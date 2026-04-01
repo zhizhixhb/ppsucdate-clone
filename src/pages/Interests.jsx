@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import localforage from 'localforage'
 
 function Interests({ user, setUser }) {
-  const [activeTab, setActiveTab] = useState('interests') // 'interests' or 'mbti'
+  const [activeTab, setActiveTab] = useState('interests') // 'interests', 'mbti', 'values', 'lifestyle'
   const [interests, setInterests] = useState({
     hobbies: [],
     sports: [],
@@ -13,6 +13,38 @@ function Interests({ user, setUser }) {
     food: [],
     travel: [],
     personality: []
+  })
+  
+  // 价值观问卷状态
+  const [values, setValues] = useState({
+    family: 0,
+    career: 0,
+    friends: 0,
+    health: 0,
+    wealth: 0,
+    education: 0,
+    spirituality: 0,
+    freedom: 0,
+    community: 0,
+    creativity: 0,
+    stability: 0,
+    adventure: 0
+  })
+  
+  // 生活方式问卷状态
+  const [lifestyle, setLifestyle] = useState({
+    social: 0,
+    workLifeBalance: 0,
+    riskTaking: 0,
+    routine: 0,
+    spending: 0,
+    healthConsciousness: 0,
+    environmentalAwareness: 0,
+    culturalEngagement: 0,
+    travel: 0,
+    hobbies: 0,
+    technology: 0,
+    relaxation: 0
   })
   
   const [customInterests, setCustomInterests] = useState({})
@@ -202,6 +234,16 @@ function Interests({ user, setUser }) {
       if (userMbti) {
         setMbtiResult(userMbti)
       }
+      
+      const userValues = await localforage.getItem(`values_${user.id}`)
+      if (userValues) {
+        setValues(userValues)
+      }
+      
+      const userLifestyle = await localforage.getItem(`lifestyle_${user.id}`)
+      if (userLifestyle) {
+        setLifestyle(userLifestyle)
+      }
     }
   }
 
@@ -370,6 +412,22 @@ function Interests({ user, setUser }) {
       totalPossible += categoryPossible * weight
     })
     
+    // 添加价值观匹配分数（权重高）
+    if (Object.values(values).some(v => v > 0) && otherUser.values) {
+      const valuesMatchScore = calculateValuesMatch(values, otherUser.values)
+      const valuesWeight = 1.5
+      totalScore += valuesMatchScore * valuesWeight
+      totalPossible += 10 * valuesWeight
+    }
+    
+    // 添加生活方式匹配分数（权重高）
+    if (Object.values(lifestyle).some(v => v > 0) && otherUser.lifestyle) {
+      const lifestyleMatchScore = calculateLifestyleMatch(lifestyle, otherUser.lifestyle)
+      const lifestyleWeight = 1.5
+      totalScore += lifestyleMatchScore * lifestyleWeight
+      totalPossible += 10 * lifestyleWeight
+    }
+    
     // 添加MBTI匹配分数（权重更高）
     if (mbtiResult && otherUser.mbti) {
       const mbtiMatchScore = calculateMbtiMatch(mbtiResult.type, otherUser.mbti.type)
@@ -382,6 +440,80 @@ function Interests({ user, setUser }) {
     return totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0
   }
 
+  const calculateValuesMatch = (userValues, otherValues) => {
+    let totalDifference = 0
+    let totalCategories = 0
+    
+    // 为不同价值观类别设置不同权重
+    const valueWeights = {
+      family: 1.2,
+      career: 1.1,
+      friends: 1.0,
+      health: 1.3,
+      wealth: 0.9,
+      education: 1.0,
+      spirituality: 0.8,
+      freedom: 1.1,
+      community: 0.9,
+      creativity: 0.8,
+      stability: 1.0,
+      adventure: 0.7
+    }
+    
+    Object.keys(userValues).forEach(key => {
+      if (otherValues[key] !== undefined && userValues[key] > 0) {
+        const weight = valueWeights[key] || 1.0
+        totalDifference += Math.abs(userValues[key] - otherValues[key]) * weight
+        totalCategories += weight
+      }
+    })
+    
+    if (totalCategories === 0) return 5
+    
+    // 计算加权平均差异（0-10分）
+    const averageDifference = totalDifference / totalCategories
+    // 转换为匹配分数（10-0分，差异越小分数越高）
+    const matchScore = 10 - averageDifference
+    return matchScore
+  }
+  
+  const calculateLifestyleMatch = (userLifestyle, otherLifestyle) => {
+    let totalDifference = 0
+    let totalCategories = 0
+    
+    // 为不同生活方式类别设置不同权重
+    const lifestyleWeights = {
+      social: 1.0,
+      workLifeBalance: 1.2,
+      riskTaking: 0.8,
+      routine: 0.9,
+      spending: 0.8,
+      healthConsciousness: 1.1,
+      environmentalAwareness: 0.7,
+      culturalEngagement: 0.8,
+      travel: 0.9,
+      hobbies: 0.8,
+      technology: 0.7,
+      relaxation: 1.0
+    }
+    
+    Object.keys(userLifestyle).forEach(key => {
+      if (otherLifestyle[key] !== undefined && userLifestyle[key] > 0) {
+        const weight = lifestyleWeights[key] || 1.0
+        totalDifference += Math.abs(userLifestyle[key] - otherLifestyle[key]) * weight
+        totalCategories += weight
+      }
+    })
+    
+    if (totalCategories === 0) return 5
+    
+    // 计算加权平均差异（0-10分）
+    const averageDifference = totalDifference / totalCategories
+    // 转换为匹配分数（10-0分，差异越小分数越高）
+    const matchScore = 10 - averageDifference
+    return matchScore
+  }
+  
   const calculateMbtiMatch = (userType, otherType) => {
     // 扩展的MBTI匹配算法
     const compatibility = {
@@ -445,7 +577,9 @@ function Interests({ user, setUser }) {
         user: otherUser,
         score,
         commonInterests: findCommonInterests(otherUser),
-        mbtiMatch: mbtiResult && otherUser.mbti ? calculateMbtiMatch(mbtiResult.type, otherUser.mbti.type) : null
+        mbtiMatch: mbtiResult && otherUser.mbti ? calculateMbtiMatch(mbtiResult.type, otherUser.mbti.type) : null,
+        valuesMatch: Object.values(values).some(v => v > 0) && otherUser.values ? calculateValuesMatch(values, otherUser.values) : null,
+        lifestyleMatch: Object.values(lifestyle).some(v => v > 0) && otherUser.lifestyle ? calculateLifestyleMatch(lifestyle, otherUser.lifestyle) : null
       }
     })
     
@@ -697,6 +831,18 @@ function Interests({ user, setUser }) {
                   onClick={() => setActiveTab('mbti')}
                 >
                   MBTI性格测试
+                </button>
+                <button
+                  className={`tab-button ${activeTab === 'values' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('values')}
+                >
+                  价值观问卷
+                </button>
+                <button
+                  className={`tab-button ${activeTab === 'lifestyle' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('lifestyle')}
+                >
+                  生活方式问卷
                 </button>
               </div>
               
@@ -1088,6 +1234,114 @@ function Interests({ user, setUser }) {
                   )}
                 </div>
               )}
+              
+              {/* 价值观问卷选项卡 */}
+              {activeTab === 'values' && (
+                <div className="tab-content">
+                  <h2 className="section-title">价值观问卷</h2>
+                  <p className="section-description">请对以下价值观进行评分，1-10分表示重要程度（1=不重要，10=非常重要）</p>
+                  
+                  <div className="questionnaire-container">
+                    {Object.entries({
+                      family: '家庭：与家人的关系和家庭生活',
+                      career: '事业：职业发展和工作成就',
+                      friends: '友谊：与朋友的关系和社交网络',
+                      health: '健康：身体健康和心理健康',
+                      wealth: '财富：经济安全和物质生活',
+                      education: '教育：个人学习和知识获取',
+                      spirituality: '精神追求：信仰和个人价值观',
+                      freedom: '自由：个人自主和独立',
+                      community: '社区：为社会做出贡献',
+                      creativity: '创造力：表达和创新',
+                      stability: '稳定性：生活的可预测性和安全性',
+                      adventure: '冒险：探索和新体验'
+                    }).map(([key, label]) => (
+                      <div key={key} className="question-item">
+                        <div className="question-label">{label}</div>
+                        <div className="rating-container">
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={values[key] || 0}
+                            onChange={(e) => setValues(prev => ({
+                              ...prev,
+                              [key]: parseInt(e.target.value)
+                            }))}
+                            className="rating-slider"
+                          />
+                          <span className="rating-value">{values[key] || 0}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="action-buttons">
+                    <button className="primary-button" onClick={() => {
+                      if (user) {
+                        localforage.setItem(`values_${user.id}`, values)
+                        alert('价值观保存成功！')
+                      }
+                    }}>
+                      保存价值观
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* 生活方式问卷选项卡 */}
+              {activeTab === 'lifestyle' && (
+                <div className="tab-content">
+                  <h2 className="section-title">生活方式问卷</h2>
+                  <p className="section-description">请对以下生活方式相关问题进行评分，1-10分表示符合程度（1=非常不符合，10=非常符合）</p>
+                  
+                  <div className="questionnaire-container">
+                    {Object.entries({
+                      social: '社交活动：我喜欢参加各种社交活动和聚会',
+                      workLifeBalance: '工作生活平衡：我能够平衡工作和个人生活',
+                      riskTaking: '冒险倾向：我喜欢尝试新事物和冒险',
+                      routine: '生活规律：我喜欢有规律的生活方式',
+                      spending: '消费观念：我更注重品质而非价格',
+                      healthConsciousness: '健康意识：我注重健康饮食和锻炼',
+                      environmentalAwareness: '环保意识：我关注环保和可持续生活',
+                      culturalEngagement: '文化参与：我喜欢参与文化活动和艺术',
+                      travel: '旅行：我喜欢探索新地方和文化',
+                      hobbies: '兴趣爱好：我有多种兴趣爱好',
+                      technology: '科技使用：我喜欢使用最新科技产品',
+                      relaxation: '放松方式：我有有效的放松和减压方式'
+                    }).map(([key, label]) => (
+                      <div key={key} className="question-item">
+                        <div className="question-label">{label}</div>
+                        <div className="rating-container">
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={lifestyle[key] || 0}
+                            onChange={(e) => setLifestyle(prev => ({
+                              ...prev,
+                              [key]: parseInt(e.target.value)
+                            }))}
+                            className="rating-slider"
+                          />
+                          <span className="rating-value">{lifestyle[key] || 0}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="action-buttons">
+                    <button className="primary-button" onClick={() => {
+                      if (user) {
+                        localforage.setItem(`lifestyle_${user.id}`, lifestyle)
+                        alert('生活方式保存成功！')
+                      }
+                    }}>
+                      保存生活方式
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="matches-container">
@@ -1123,6 +1377,20 @@ function Interests({ user, setUser }) {
                         {mbtiResult && match.user.mbti && (
                           <div className="mbti-match-info">
                             <p>MBTI匹配: {mbtiResult.type} vs {match.user.mbti.type}</p>
+                          </div>
+                        )}
+                        
+                        {/* 价值观匹配信息 */}
+                        {match.valuesMatch !== null && (
+                          <div className="values-match-info">
+                            <p>价值观匹配: {Math.round(match.valuesMatch)}%</p>
+                          </div>
+                        )}
+                        
+                        {/* 生活方式匹配信息 */}
+                        {match.lifestyleMatch !== null && (
+                          <div className="lifestyle-match-info">
+                            <p>生活方式匹配: {Math.round(match.lifestyleMatch)}%</p>
                           </div>
                         )}
                         
