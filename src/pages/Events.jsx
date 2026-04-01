@@ -2,23 +2,27 @@ import { useState, useEffect } from 'react'
 import localforage from 'localforage'
 
 function Events({ user }) {
-  const [events, setEvents] = useState([])
+  const [posts, setPosts] = useState([])
   const [formData, setFormData] = useState({
     title: '',
-    description: '',
-    date: '',
-    time: '',
-    location: ''
+    content: ''
   })
-  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [comments, setComments] = useState({})
+  const [commentText, setCommentText] = useState({})
 
   useEffect(() => {
-    loadEvents()
+    loadPosts()
+    loadComments()
   }, [])
 
-  const loadEvents = async () => {
-    const allEvents = await localforage.getItem('events') || []
-    setEvents(allEvents)
+  const loadPosts = async () => {
+    const allPosts = await localforage.getItem('communityPosts') || []
+    setPosts(allPosts)
+  }
+
+  const loadComments = async () => {
+    const allComments = await localforage.getItem('communityComments') || {}
+    setComments(allComments)
   }
 
   const handleChange = (e) => {
@@ -32,159 +36,248 @@ function Events({ user }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!formData.title || !formData.date || !formData.location) {
-      alert('请填写标题、日期和地点')
+    if (!formData.title || !formData.content) {
+      alert('请填写标题和内容')
       return
     }
 
-    const newEvent = {
+    const newPost = {
       id: Date.now(),
-      organizerId: user.id,
-      organizerName: user.username,
+      authorId: user.id,
+      authorName: user.username,
       ...formData,
-      participants: [user.id],
+      likes: [],
+      comments: 0,
       createdAt: new Date().toISOString()
     }
 
-    const updatedEvents = [...events, newEvent]
-    setEvents(updatedEvents)
-    await localforage.setItem('events', updatedEvents)
+    const updatedPosts = [...posts, newPost]
+    setPosts(updatedPosts)
+    await localforage.setItem('communityPosts', updatedPosts)
     
     // 重置表单
     setFormData({
       title: '',
-      description: '',
-      date: '',
-      time: '',
-      location: ''
+      content: ''
     })
   }
 
-  const handleJoinEvent = async (eventId) => {
-    const updatedEvents = events.map(event => {
-      if (event.id === eventId) {
-        if (!event.participants.includes(user.id)) {
+  const handleLike = async (postId) => {
+    const updatedPosts = posts.map(post => {
+      if (post.id === postId) {
+        if (post.likes.includes(user.id)) {
           return {
-            ...event,
-            participants: [...event.participants, user.id]
+            ...post,
+            likes: post.likes.filter(id => id !== user.id)
+          }
+        } else {
+          return {
+            ...post,
+            likes: [...post.likes, user.id]
           }
         }
       }
-      return event
+      return post
     })
-    setEvents(updatedEvents)
-    await localforage.setItem('events', updatedEvents)
-    alert('成功参与活动')
+    setPosts(updatedPosts)
+    await localforage.setItem('communityPosts', updatedPosts)
   }
 
-  const handleLeaveEvent = async (eventId) => {
-    const updatedEvents = events.map(event => {
-      if (event.id === eventId) {
+  const handleCommentChange = (postId, value) => {
+    setCommentText(prev => ({
+      ...prev,
+      [postId]: value
+    }))
+  }
+
+  const handleCommentSubmit = async (postId) => {
+    const text = commentText[postId]
+    if (!text) return
+
+    const newComment = {
+      id: Date.now(),
+      postId,
+      authorId: user.id,
+      authorName: user.username,
+      content: text,
+      createdAt: new Date().toISOString()
+    }
+
+    const updatedComments = {
+      ...comments,
+      [postId]: [...(comments[postId] || []), newComment]
+    }
+    setComments(updatedComments)
+    await localforage.setItem('communityComments', updatedComments)
+
+    // 更新帖子的评论数
+    const updatedPosts = posts.map(post => {
+      if (post.id === postId) {
         return {
-          ...event,
-          participants: event.participants.filter(id => id !== user.id)
+          ...post,
+          comments: (comments[postId] || []).length + 1
         }
       }
-      return event
+      return post
     })
-    setEvents(updatedEvents)
-    await localforage.setItem('events', updatedEvents)
-    alert('已退出活动')
+    setPosts(updatedPosts)
+    await localforage.setItem('communityPosts', updatedPosts)
+
+    // 清空评论输入
+    setCommentText(prev => ({
+      ...prev,
+      [postId]: ''
+    }))
+  }
+
+  // 计算用户参与统计
+  const participationStats = {
+    totalPosts: posts.length,
+    userPosts: posts.filter(post => post.authorId === user.id).length,
+    totalLikes: posts.reduce((sum, post) => sum + post.likes.length, 0),
+    userLikes: posts.filter(post => post.likes.includes(user.id)).length,
+    totalComments: Object.values(comments).reduce((sum, postComments) => sum + postComments.length, 0),
+    userComments: Object.values(comments).reduce((sum, postComments) => 
+      sum + postComments.filter(comment => comment.authorId === user.id).length, 0
+    )
   }
 
   return (
-    <div className="container">
-      <h2>活动</h2>
-      
-      <div className="card">
-        <h3>发布新活动</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="title">标题</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="description">描述</label>
-            <input
-              type="text"
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="date">日期</label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="time">时间</label>
-            <input
-              type="time"
-              id="time"
-              name="time"
-              value={formData.time}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="location">地点</label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <button type="submit">发布活动</button>
-          </div>
-        </form>
+    <div className="community-page">
+      {/* 英雄区域 */}
+      <div className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">社区互动</h1>
+          <p className="hero-description">
+            在这里与其他同学交流、分享想法和参与讨论
+          </p>
+        </div>
       </div>
 
-      <div className="card">
-        <h3>活动列表</h3>
-        {events.length === 0 ? (
-          <p>暂无活动</p>
-        ) : (
-          <ul>
-            {events.map(event => (
-              <li key={event.id} style={{ marginBottom: '10px', padding: '10px', borderBottom: '1px solid #eee' }}>
-                <h4>{event.title}</h4>
-                <p>{event.description}</p>
-                <p>时间：{event.date} {event.time}</p>
-                <p>地点：{event.location}</p>
-                <p>组织者：{event.organizerName}</p>
-                <p>参与人数：{event.participants.length}</p>
-                {event.participants.includes(user.id) ? (
-                  <button className="btn btn-secondary" onClick={() => handleLeaveEvent(event.id)}>
-                    退出活动
-                  </button>
-                ) : (
-                  <button className="btn btn-primary" onClick={() => handleJoinEvent(event.id)}>
-                    参与活动
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+      <div className="container">
+        {/* 用户参与统计 */}
+        <div className="stats-section">
+          <h3 className="stats-title">我的参与统计</h3>
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-number">{participationStats.userPosts}</div>
+              <div className="stat-label">发布帖子</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">{participationStats.userLikes}</div>
+              <div className="stat-label">获得点赞</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">{participationStats.userComments}</div>
+              <div className="stat-label">发表评论</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">{participationStats.totalPosts}</div>
+              <div className="stat-label">总帖子数</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 发布新帖子 */}
+        <div className="post-form-section">
+          <h3 className="section-title">发布新帖子</h3>
+          <form className="post-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="title">标题</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                placeholder="请输入帖子标题"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="content">内容</label>
+              <textarea
+                id="content"
+                name="content"
+                value={formData.content}
+                onChange={handleChange}
+                required
+                placeholder="分享你的想法..."
+                rows="5"
+              ></textarea>
+            </div>
+            <button type="submit" className="submit-button">发布帖子</button>
+          </form>
+        </div>
+
+        {/* 帖子列表 */}
+        <div className="posts-section">
+          <h3 className="section-title">社区动态</h3>
+          {posts.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">📝</div>
+              <p>暂无帖子，快来发布第一条吧！</p>
+            </div>
+          ) : (
+            <div className="posts-grid">
+              {posts.map(post => (
+                <div key={post.id} className="post-card">
+                  <div className="post-header">
+                    <div className="post-author">
+                      <div className="author-avatar">{post.authorName.charAt(0)}</div>
+                      <div className="author-info">
+                        <div className="author-name">{post.authorName}</div>
+                        <div className="post-time">
+                          {new Date(post.createdAt).toLocaleString('zh-CN')}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="post-content">
+                    <h4 className="post-title">{post.title}</h4>
+                    <p className="post-text">{post.content}</p>
+                  </div>
+                  <div className="post-actions">
+                    <button 
+                      className={`action-button like-button ${post.likes.includes(user.id) ? 'liked' : ''}`}
+                      onClick={() => handleLike(post.id)}
+                    >
+                      <span className="action-icon">❤️</span>
+                      <span className="action-count">{post.likes.length}</span>
+                    </button>
+                    <div className="comment-section">
+                      <div className="comment-input">
+                        <input
+                          type="text"
+                          placeholder="写下你的评论..."
+                          value={commentText[post.id] || ''}
+                          onChange={(e) => handleCommentChange(post.id, e.target.value)}
+                        />
+                        <button 
+                          className="comment-button"
+                          onClick={() => handleCommentSubmit(post.id)}
+                        >
+                          发送
+                        </button>
+                      </div>
+                      <div className="comments-list">
+                        {comments[post.id] && comments[post.id].map(comment => (
+                          <div key={comment.id} className="comment-item">
+                            <div className="comment-author">{comment.authorName}</div>
+                            <div className="comment-content">{comment.content}</div>
+                            <div className="comment-time">
+                              {new Date(comment.createdAt).toLocaleString('zh-CN')}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

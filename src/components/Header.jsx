@@ -12,6 +12,10 @@ function Header({ user, onLogout }) {
             <Link to="/schedule">日程安排</Link>
             <Link to="/messages">消息</Link>
             <Link to="/events">活动</Link>
+            <Link to="/interests">兴趣匹配</Link>
+            {user.isAdmin && <Link to="/admin">后台管理</Link>}
+            <Link to="/about">关于我们</Link>
+            <Link to="/contact">联系我们</Link>
             <button className="btn btn-secondary" onClick={onLogout}>
               退出登录
             </button>
@@ -20,6 +24,8 @@ function Header({ user, onLogout }) {
           <>
             <Link to="/login">登录</Link>
             <Link to="/register">注册</Link>
+            <Link to="/about">关于我们</Link>
+            <Link to="/contact">联系我们</Link>
           </>
         )}
       </nav>

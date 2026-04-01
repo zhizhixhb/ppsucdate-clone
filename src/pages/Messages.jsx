@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import localforage from 'localforage'
 
 function Messages({ user }) {
@@ -48,74 +49,128 @@ function Messages({ user }) {
   }
 
   return (
-    <div className="container">
-      <h2>消息</h2>
-      <div className="message-container">
-        <div style={{ flex: 1, maxWidth: '300px' }}>
-          <h3>联系人</h3>
-          {users.length === 0 ? (
-            <p>暂无联系人</p>
-          ) : (
-            <ul>
-              {users.map(otherUser => (
-                <li 
-                  key={otherUser.id} 
-                  style={{ 
-                    padding: '10px', 
-                    borderBottom: '1px solid #eee',
-                    cursor: 'pointer',
-                    backgroundColor: selectedUser?.id === otherUser.id ? '#f0f8ff' : 'white'
-                  }}
-                  onClick={() => setSelectedUser(otherUser)}
-                >
-                  {otherUser.username}
-                </li>
-              ))}
-            </ul>
-          )}
+    <div className="messages-page">
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            <span className="brand-highlight">消息中心</span>
+          </h1>
+          <p className="hero-subtitle">保持联系</p>
+          <p className="hero-description">
+            与朋友和匹配的人进行实时交流，建立深厚的友谊
+          </p>
         </div>
-        <div style={{ flex: 2 }}>
-          <h3>{selectedUser ? `与 ${selectedUser.username} 聊天` : '请选择联系人'}</h3>
-          {selectedUser ? (
-            <div className="chat-area">
-              {messages.map(message => (
-                <div 
-                  key={message.id} 
-                  style={{ 
-                    marginBottom: '10px', 
-                    padding: '10px', 
-                    borderRadius: '8px',
-                    backgroundColor: message.senderId === user.id ? '#e3f2fd' : '#f5f5f5',
-                    alignSelf: message.senderId === user.id ? 'flex-end' : 'flex-start',
-                    maxWidth: '80%',
-                    marginLeft: message.senderId === user.id ? 'auto' : '0'
-                  }}
-                >
-                  <p style={{ margin: '0' }}>{message.content}</p>
-                  <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#666' }}>
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </p>
+      </section>
+
+      {/* Messages Section */}
+      <section className="messages-section">
+        <div className="container">
+          <div className="messages-container">
+            {/* Contacts Sidebar */}
+            <div className="contacts-sidebar">
+              <h2 className="contacts-title">联系人</h2>
+              {users.length === 0 ? (
+                <div className="empty-contacts">
+                  <div className="empty-icon">👥</div>
+                  <p>暂无联系人</p>
+                  <p>开始与其他用户互动吧</p>
                 </div>
-              ))}
+              ) : (
+                <div className="contacts-list">
+                  {users.map(otherUser => (
+                    <div 
+                      key={otherUser.id} 
+                      className={`contact-item ${selectedUser?.id === otherUser.id ? 'active' : ''}`}
+                      onClick={() => setSelectedUser(otherUser)}
+                    >
+                      <div className="contact-info">
+                        <h3 className="contact-name">{otherUser.username}</h3>
+                        {otherUser.mbti && (
+                          <span className="contact-mbti">{otherUser.mbti}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          ) : (
-            <p>选择一个联系人开始聊天</p>
-          )}
-          {selectedUser && (
-            <div className="message-input">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="输入消息..."
-              />
-              <button className="btn btn-primary" onClick={handleSendMessage}>
-                发送
-              </button>
+
+            {/* Chat Area */}
+            <div className="chat-area">
+              {selectedUser ? (
+                <>
+                  <div className="chat-header">
+                    <h2 className="chat-title">与 {selectedUser.username} 聊天</h2>
+                    {selectedUser.mbti && (
+                      <span className="chat-mbti">{selectedUser.mbti}</span>
+                    )}
+                  </div>
+                  <div className="chat-messages">
+                    {messages.map(message => (
+                      <div 
+                        key={message.id} 
+                        className={`message ${message.senderId === user.id ? 'sent' : 'received'}`}
+                      >
+                        <div className="message-content">
+                          <p>{message.content}</p>
+                          <span className="message-time">
+                            {new Date(message.timestamp).toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="message-input-container">
+                    <input
+                      type="text"
+                      className="message-input"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="输入消息..."
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    />
+                    <button 
+                      className="message-send-button" 
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim()}
+                    >
+                      发送
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="no-chat-selected">
+                  <div className="empty-icon">💬</div>
+                  <h3>请选择联系人</h3>
+                  <p>选择一个联系人开始聊天</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="home-footer">
+        <div className="container">
+          <div className="footer-content">
+            <div className="footer-brand">
+              <h3>PPSUC Date</h3>
+              <p>公安大学校园社交平台</p>
+            </div>
+            <div className="footer-links">
+              <Link to="#">关于我们</Link>
+              <Link to="#">使用条款</Link>
+              <Link to="#">隐私政策</Link>
+              <Link to="#">联系我们</Link>
+            </div>
+            <div className="footer-copyright">
+              <p>&copy; 2024 PPSUC Date. 保留所有权利。</p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

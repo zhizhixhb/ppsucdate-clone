@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import localforage from 'localforage'
 
 // 简单的密码加密函数
@@ -14,14 +15,15 @@ const decryptPassword = (encryptedPassword) => {
 function Login({ onLogin }) {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    remember: false
   })
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value, type, checked } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }))
   }
 
@@ -45,38 +47,125 @@ function Login({ onLogin }) {
 
     // 登录用户
     onLogin(user)
+    
+    // 记住登录信息
+    if (formData.remember) {
+      // 添加过期时间（30天）
+      const rememberedUser = {
+        ...user,
+        rememberExpiry: Date.now() + 30 * 24 * 60 * 60 * 1000 // 30天过期
+      }
+      // 使用localStorage存储，添加简单的加密
+      const encryptedUser = btoa(JSON.stringify(rememberedUser))
+      localStorage.setItem('rememberedUser', encryptedUser)
+    } else {
+      // 清除记住的用户信息
+      localStorage.removeItem('rememberedUser')
+      await localforage.removeItem('rememberedUser') // 兼容旧版本
+    }
   }
 
   return (
-    <div className="auth-form">
-      <h2>登录</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="email">邮箱</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+    <div className="auth-page">
+      {/* 主背景 */}
+      <div className="main-background">
+        <div className="background-overlay">
+          {/* 顶部导航 */}
+          <nav className="sjtudate-nav">
+            <div className="nav-content">
+              <span className="nav-text">PPSUC Date</span>
+            </div>
+          </nav>
+
+          {/* 主内容 */}
+          <div className="main-content">
+            <h1 className="main-title">欢迎回来</h1>
+            <p className="main-subtitle">登录您的账号</p>
+            <p className="main-description">
+              登录后继续探索校园社交的精彩，找到志同道合的朋友
+            </p>
+            
+            {/* 登录表单 */}
+            <div className="auth-form-card">
+              <h2 className="auth-form-title">登录</h2>
+              <form onSubmit={handleSubmit} className="auth-form">
+                <div className="form-group">
+                  <label htmlFor="email">邮箱</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="auth-input"
+                    placeholder="请输入您的公大邮箱"
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="password">密码</label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className="auth-input"
+                    placeholder="请输入您的密码"
+                  />
+                </div>
+                <div className="form-group form-checkbox">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <input
+                      type="checkbox"
+                      id="remember"
+                      name="remember"
+                      checked={formData.remember}
+                      onChange={handleChange}
+                    />
+                    记住我（30天内自动登录）
+                  </label>
+                  <small className="form-help">勾选后，系统将安全存储您的登录信息，30天内无需重新输入密码</small>
+                </div>
+                <div className="form-group">
+                  <button type="submit" className="sjtudate-btn">
+                    登录
+                  </button>
+                </div>
+                <div className="form-group">
+                  <button 
+                    type="button" 
+                    className="clear-credentials-btn"
+                    onClick={() => {
+                      localStorage.removeItem('rememberedUser')
+                      localforage.removeItem('rememberedUser')
+                      alert('已清除保存的登录信息')
+                    }}
+                  >
+                    清除已保存的登录信息
+                  </button>
+                </div>
+                <div className="auth-links">
+                  <p>还没有账号？ <Link to="/register" className="auth-link">立即注册</Link></p>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-        <div className="form-group">
-          <label htmlFor="password">密码</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+      </div>
+
+      {/* 页脚 */}
+      <footer className="sjtudate-footer">
+        <div className="container">
+          <p className="footer-text">© 2024 PPSUC Date. 保留所有权利。</p>
+          <div className="footer-links">
+            <Link to="#" className="footer-link">关于我们</Link>
+            <Link to="#" className="footer-link">隐私政策</Link>
+            <Link to="#" className="footer-link">使用条款</Link>
+          </div>
         </div>
-        <div className="form-group">
-          <button type="submit">登录</button>
-        </div>
-      </form>
+      </footer>
     </div>
   )
 }

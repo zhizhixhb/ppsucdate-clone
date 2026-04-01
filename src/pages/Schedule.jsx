@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import localforage from 'localforage'
 
 function Schedule({ user }) {
@@ -68,79 +69,142 @@ function Schedule({ user }) {
   }
 
   return (
-    <div className="container">
-      <h2>日程安排</h2>
-      
-      <div className="card">
-        <h3>添加新日程</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="title">标题</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="description">描述</label>
-            <input
-              type="text"
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="date">日期</label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="time">时间</label>
-            <input
-              type="time"
-              id="time"
-              name="time"
-              value={formData.time}
-              onChange={handleChange}
-            />
-          </div>
-          <div className="form-group">
-            <button type="submit">添加日程</button>
-          </div>
-        </form>
-      </div>
+    <div className="schedule-page">
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            <span className="brand-highlight">日程安排</span>
+          </h1>
+          <p className="hero-subtitle">管理您的时间</p>
+          <p className="hero-description">
+            记录重要事件，合理规划时间，让生活更加有序
+          </p>
+        </div>
+      </section>
 
-      <div className="card">
-        <h3>我的日程</h3>
-        {schedules.length === 0 ? (
-          <p>暂无日程</p>
-        ) : (
-          <ul>
-            {schedules.map(schedule => (
-              <li key={schedule.id} style={{ marginBottom: '10px', padding: '10px', borderBottom: '1px solid #eee' }}>
-                <h4>{schedule.title}</h4>
-                <p>{schedule.description}</p>
-                <p>{schedule.date} {schedule.time}</p>
-                <button className="btn btn-secondary" onClick={() => handleDelete(schedule.id)}>
-                  删除
+      {/* Schedule Section */}
+      <section className="schedule-section">
+        <div className="container">
+          {/* Add Schedule Card */}
+          <div className="schedule-card">
+            <h2 className="schedule-card-title">添加新日程</h2>
+            <form onSubmit={handleSubmit} className="schedule-form">
+              <div className="form-group">
+                <label htmlFor="title">标题</label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  required
+                  className="schedule-input"
+                  placeholder="输入日程标题"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="description">描述</label>
+                <input
+                  type="text"
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className="schedule-input"
+                  placeholder="添加详细描述"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="date">日期</label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={formData.date}
+                  onChange={handleChange}
+                  required
+                  className="schedule-input"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="time">时间</label>
+                <input
+                  type="time"
+                  id="time"
+                  name="time"
+                  value={formData.time}
+                  onChange={handleChange}
+                  className="schedule-input"
+                />
+              </div>
+              <div className="form-group">
+                <button type="submit" className="schedule-button">
+                  添加日程
                 </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+              </div>
+            </form>
+          </div>
+
+          {/* My Schedules Card */}
+          <div className="schedule-card">
+            <h2 className="schedule-card-title">我的日程</h2>
+            {schedules.length === 0 ? (
+              <div className="empty-schedule">
+                <div className="empty-icon">📅</div>
+                <p>暂无日程安排</p>
+                <p>添加您的第一个日程，开始规划时间</p>
+              </div>
+            ) : (
+              <div className="schedule-list">
+                {schedules.map(schedule => (
+                  <div key={schedule.id} className="schedule-item">
+                    <div className="schedule-item-content">
+                      <h3 className="schedule-item-title">{schedule.title}</h3>
+                      {schedule.description && (
+                        <p className="schedule-item-description">{schedule.description}</p>
+                      )}
+                      <p className="schedule-item-time">
+                        <span className="schedule-item-date">{schedule.date}</span>
+                        {schedule.time && (
+                          <span className="schedule-item-time-value"> {schedule.time}</span>
+                        )}
+                      </p>
+                    </div>
+                    <button 
+                      className="schedule-item-delete" 
+                      onClick={() => handleDelete(schedule.id)}
+                    >
+                      删除
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="home-footer">
+        <div className="container">
+          <div className="footer-content">
+            <div className="footer-brand">
+              <h3>PPSUC Date</h3>
+              <p>公安大学校园社交平台</p>
+            </div>
+            <div className="footer-links">
+              <Link to="#">关于我们</Link>
+              <Link to="#">使用条款</Link>
+              <Link to="#">隐私政策</Link>
+              <Link to="#">联系我们</Link>
+            </div>
+            <div className="footer-copyright">
+              <p>&copy; 2024 PPSUC Date. 保留所有权利。</p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }
