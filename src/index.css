@@ -519,7 +519,7 @@ body {
   animation: fadeInUp 0.8s ease-out;
   position: relative;
   z-index: 1;
-  padding: 0 20px;
+  padding: 80px 20px 0;
 }
 
 .main-title {
@@ -2854,6 +2854,30 @@ body {
   color: #333;
 }
 
+.calendar-month-year-select {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.calendar-year-select,
+.calendar-month-select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.calendar-year-select {
+  width: 80px;
+}
+
+.calendar-month-select {
+  width: 100px;
+}
+
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -5102,6 +5126,39 @@ body {
   top: 30px;
   font-size: 2rem;
   animation: pulse 2s ease-in-out infinite;
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+  .ai-question {
+    padding-left: 70px;
+  }
+  
+  .ai-avatar {
+    left: 20px;
+    top: 20px;
+    font-size: 1.5rem;
+  }
+  
+  .question-text {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-question {
+    padding-left: 60px;
+  }
+  
+  .ai-avatar {
+    left: 15px;
+    top: 15px;
+    font-size: 1.2rem;
+  }
+  
+  .question-text {
+    font-size: 0.9rem;
+  }
 }
 
 .question-text {

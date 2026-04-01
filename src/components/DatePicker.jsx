@@ -102,6 +102,22 @@ function DatePicker({
     }
   }
 
+  const handleInputChange = (e) => {
+    const value = e.target.value
+    setSelectedDate(value)
+    onChange(value)
+  }
+
+  const handleYearChange = (e) => {
+    const year = parseInt(e.target.value)
+    setCurrentYear(year)
+  }
+
+  const handleMonthChange = (e) => {
+    const month = parseInt(e.target.value)
+    setCurrentMonth(month)
+  }
+
   return (
     <div className={`date-picker-container ${className}`} ref={pickerRef}>
       {label && <label className="date-picker-label">{label}</label>}
@@ -110,9 +126,9 @@ function DatePicker({
           type="text"
           className="date-picker-input"
           value={selectedDate}
+          onChange={handleInputChange}
           onClick={() => setIsOpen(!isOpen)}
-          readOnly
-          placeholder="选择日期"
+          placeholder="YYYY-MM-DD 或点击选择"
         />
         <div className="date-picker-icon" onClick={() => setIsOpen(!isOpen)}>
           📅
@@ -125,8 +141,25 @@ function DatePicker({
             <button className="calendar-nav" onClick={handlePrevMonth}>
               ‹
             </button>
-            <div className="calendar-month-year">
-              {months[currentMonth]} {currentYear}
+            <div className="calendar-month-year-select">
+              <select 
+                value={currentYear} 
+                onChange={handleYearChange}
+                className="calendar-year-select"
+              >
+                {Array.from({length: 100}, (_, i) => 1950 + i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+              <select 
+                value={currentMonth} 
+                onChange={handleMonthChange}
+                className="calendar-month-select"
+              >
+                {months.map((month, index) => (
+                  <option key={index} value={index}>{month}</option>
+                ))}
+              </select>
             </div>
             <button className="calendar-nav" onClick={handleNextMonth}>
               ›

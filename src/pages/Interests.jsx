@@ -729,27 +729,27 @@ function Interests({ user, setUser }) {
   // 根据MBTI类型生成卡通形象
   const getMbtiCartoon = (type) => {
     // 为每种MBTI类型生成不同的卡通形象
-    const cartoonPrompts = {
-      'ISTJ': 'cartoon character for ISTJ personality type, responsible, practical, traditional, police academy student, professional, blue uniform, serious expression',
-      'ISFJ': 'cartoon character for ISFJ personality type, caring, supportive, loyal, police academy student, warm smile, blue uniform, helping others',
-      'INFJ': 'cartoon character for INFJ personality type, intuitive, idealistic, compassionate, police academy student, thoughtful expression, blue uniform, visionary',
-      'INTJ': 'cartoon character for INTJ personality type, strategic, analytical, independent, police academy student, confident, blue uniform, thinking',
-      'ISTP': 'cartoon character for ISTP personality type, hands-on, practical, adaptable, police academy student, active, blue uniform, problem-solving',
-      'ISFP': 'cartoon character for ISFP personality type, artistic, sensitive, flexible, police academy student, creative, blue uniform, expressive',
-      'INFP': 'cartoon character for INFP personality type, idealistic, empathetic, creative, police academy student, dreamy, blue uniform, imaginative',
-      'INTP': 'cartoon character for INTP personality type, logical, curious, innovative, police academy student, analytical, blue uniform, questioning',
-      'ESTP': 'cartoon character for ESTP personality type, energetic, action-oriented, adaptable, police academy student, dynamic, blue uniform, adventurous',
-      'ESFP': 'cartoon character for ESFP personality type, outgoing, friendly, spontaneous, police academy student, enthusiastic, blue uniform, social',
-      'ENFP': 'cartoon character for ENFP personality type, energetic, creative, enthusiastic, police academy student, optimistic, blue uniform, inspiring',
-      'ENTP': 'cartoon character for ENTP personality type, clever, curious, debate-loving, police academy student, witty, blue uniform, challenging',
-      'ESTJ': 'cartoon character for ESTJ personality type, organized, decisive, responsible, police academy student, authoritative, blue uniform, leading',
-      'ESFJ': 'cartoon character for ESFJ personality type, sociable, caring, organized, police academy student, helpful, blue uniform, connecting',
-      'ENFJ': 'cartoon character for ENFJ personality type, charismatic, inspiring, empathetic, police academy student, leader, blue uniform, motivating',
-      'ENTJ': 'cartoon character for ENTJ personality type, strategic, confident, decisive, police academy student, ambitious, blue uniform, commanding'
+    // 使用更可靠的图片源
+    const mbtiImages = {
+      'ISTJ': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ISTJ%20personality%20type%2C%20responsible%2C%20practical%2C%20traditional%2C%20police%20academy%20student%2C%20professional%2C%20blue%20uniform%2C%20serious%20expression&size=512x512',
+      'ISFJ': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ISFJ%20personality%20type%2C%20caring%2C%20supportive%2C%20loyal%2C%20police%20academy%20student%2C%20warm%20smile%2C%20blue%20uniform%2C%20helping%20others&size=512x512',
+      'INFJ': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20INFJ%20personality%20type%2C%20intuitive%2C%20idealistic%2C%20compassionate%2C%20police%20academy%20student%2C%20thoughtful%20expression%2C%20blue%20uniform%2C%20visionary&size=512x512',
+      'INTJ': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20INTJ%20personality%20type%2C%20strategic%2C%20analytical%2C%20independent%2C%20police%20academy%20student%2C%20confident%2C%20blue%20uniform%2C%20thinking&size=512x512',
+      'ISTP': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ISTP%20personality%20type%2C%20hands-on%2C%20practical%2C%20adaptable%2C%20police%20academy%20student%2C%20active%2C%20blue%20uniform%2C%20problem-solving&size=512x512',
+      'ISFP': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ISFP%20personality%20type%2C%20artistic%2C%20sensitive%2C%20flexible%2C%20police%20academy%20student%2C%20creative%2C%20blue%20uniform%2C%20expressive&size=512x512',
+      'INFP': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20INFP%20personality%20type%2C%20idealistic%2C%20empathetic%2C%20creative%2C%20police%20academy%20student%2C%20dreamy%2C%20blue%20uniform%2C%20imaginative&size=512x512',
+      'INTP': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20INTP%20personality%20type%2C%20logical%2C%20curious%2C%20innovative%2C%20police%20academy%20student%2C%20analytical%2C%20blue%20uniform%2C%20questioning&size=512x512',
+      'ESTP': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ESTP%20personality%20type%2C%20energetic%2C%20action-oriented%2C%20adaptable%2C%20police%20academy%20student%2C%20dynamic%2C%20blue%20uniform%2C%20adventurous&size=512x512',
+      'ESFP': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ESFP%20personality%20type%2C%20outgoing%2C%20friendly%2C%20spontaneous%2C%20police%20academy%20student%2C%20enthusiastic%2C%20blue%20uniform%2C%20social&size=512x512',
+      'ENFP': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ENFP%20personality%20type%2C%20energetic%2C%20creative%2C%20enthusiastic%2C%20police%20academy%20student%2C%20optimistic%2C%20blue%20uniform%2C%20inspiring&size=512x512',
+      'ENTP': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ENTP%20personality%20type%2C%20clever%2C%20curious%2C%20debate-loving%2C%20police%20academy%20student%2C%20witty%2C%20blue%20uniform%2C%20challenging&size=512x512',
+      'ESTJ': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ESTJ%20personality%20type%2C%20organized%2C%20decisive%2C%20responsible%2C%20police%20academy%20student%2C%20authoritative%2C%20blue%20uniform%2C%20leading&size=512x512',
+      'ESFJ': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ESFJ%20personality%20type%2C%20sociable%2C%20caring%2C%20organized%2C%20police%20academy%20student%2C%20helpful%2C%20blue%20uniform%2C%20connecting&size=512x512',
+      'ENFJ': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ENFJ%20personality%20type%2C%20charismatic%2C%20inspiring%2C%20empathetic%2C%20police%20academy%20student%2C%20leader%2C%20blue%20uniform%2C%20motivating&size=512x512',
+      'ENTJ': 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20ENTJ%20personality%20type%2C%20strategic%2C%20confident%2C%20decisive%2C%20police%20academy%20student%2C%20ambitious%2C%20blue%20uniform%2C%20commanding&size=512x512'
     }
     
-    const prompt = cartoonPrompts[type] || 'cartoon character for police academy student, friendly, blue uniform'
-    return `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent(prompt)}&image_size=portrait_4_3`
+    return mbtiImages[type] || 'https://neeko-copilot.bytedance.net/api/text2image?prompt=cartoon%20character%20for%20police%20academy%20student%2C%20friendly%2C%20blue%20uniform&size=512x512'
   }
   
   const calculateMbti = () => {
