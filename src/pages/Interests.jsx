@@ -1058,81 +1058,7 @@ function Interests({ user, setUser }) {
     }
   }
   
-  // 优化的匹配算法
-  const calculateMatchScore = (otherUser) => {
-    let totalScore = 0
-    let totalPossible = 0
-    
-    // 为不同类别设置不同权重
-    const categoryWeights = {
-      hobbies: 1.0,
-      sports: 0.8,
-      music: 1.2,
-      movies: 0.9,
-      books: 1.1,
-      food: 0.8,
-      travel: 1.0,
-      personality: 1.3,
-      career: 0.9,
-      entertainment: 0.8,
-      lifestyle: 1.1,
-      values: 1.2
-    }
-    
-    Object.keys(interests).forEach(category => {
-      const userInterests = interests[category]
-      const otherInterests = otherUser.interests?.[category] || []
-      const weight = categoryWeights[category] || 1.0
-      
-      // 计算该类别的匹配度
-      const commonInterests = userInterests.filter(interest => otherInterests.includes(interest))
-      const categoryScore = commonInterests.length
-      const categoryPossible = Math.max(userInterests.length, otherInterests.length)
-      
-      // 考虑兴趣数量的影响（兴趣越多，匹配难度越大）
-      const quantityFactor = Math.min(1.0, 1 / (1 + Math.log(Math.max(userInterests.length, otherInterests.length) + 1)))
-      
-      // 考虑兴趣热度的影响（热门兴趣权重降低）
-      const popularityFactor = 1.0
-      if (interestPopularity[category]) {
-        const popularInterests = interestPopularity[category].map(([interest]) => interest)
-        const commonPopularInterests = commonInterests.filter(interest => popularInterests.includes(interest))
-        if (commonPopularInterests.length > 0) {
-          popularityFactor = 0.8 // 热门兴趣匹配权重降低
-        }
-      }
-      
-      totalScore += categoryScore * weight * quantityFactor * popularityFactor
-      totalPossible += categoryPossible * weight
-    })
-    
-    // 添加价值观匹配分数（权重高）
-    if (Object.values(values).some(v => v > 0) && otherUser.values) {
-      const valuesMatchScore = calculateValuesMatch(values, otherUser.values)
-      const valuesWeight = 1.5
-      totalScore += valuesMatchScore * valuesWeight
-      totalPossible += 10 * valuesWeight
-    }
-    
-    // 添加生活方式匹配分数（权重高）
-    if (Object.values(lifestyle).some(v => v > 0) && otherUser.lifestyle) {
-      const lifestyleMatchScore = calculateLifestyleMatch(lifestyle, otherUser.lifestyle)
-      const lifestyleWeight = 1.5
-      totalScore += lifestyleMatchScore * lifestyleWeight
-      totalPossible += 10 * lifestyleWeight
-    }
-    
-    // 添加MBTI匹配分数（权重更高）
-    if (mbtiResult && otherUser.mbti) {
-      const mbtiMatchScore = calculateMbtiMatch(mbtiResult.type, otherUser.mbti.type)
-      const mbtiWeight = 2.0
-      totalScore += mbtiMatchScore * mbtiWeight
-      totalPossible += 5 * mbtiWeight
-    }
-    
-    // 归一化分数到0-100范围
-    return totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0
-  }
+  // 优化的匹配算法 - 已经在前面定义
 
   return (
     <div className="interests-page">
@@ -1421,79 +1347,79 @@ function Interests({ user, setUser }) {
                         </div>
                       </div>
                     )}
-                  </div>
-                  
-                  {/* 兴趣选项展示 */}
-                  {Object.entries(interestOptions).map(([category, options]) => {
-                    // 应用筛选条件
-                    if (filterCategory !== 'all' && filterCategory !== category) {
-                      return null
-                    }
                     
-                    // 应用搜索过滤
-                    const filteredOptions = options.filter(option => 
-                      option.toLowerCase().includes(searchQuery.toLowerCase())
-                    )
-                    
-                    return (
-                      <div key={category} className="interest-category">
-                        <h3 className="category-title">
-                          {{
-                            hobbies: '爱好',
-                            sports: '运动',
-                            music: '音乐',
-                            movies: '电影',
-                            books: '书籍',
-                            food: '美食',
-                            travel: '旅行',
-                            personality: '性格特点',
-                            career: '职业',
-                            entertainment: '娱乐',
-                            lifestyle: '生活方式',
-                            values: '价值观'
-                          }[category]}
-                        </h3>
-                        
-                        <div className="interest-options">
-                          {filteredOptions.map(option => (
+                    {/* 兴趣选项展示 */}
+                    {Object.entries(interestOptions).map(([category, options]) => {
+                      // 应用筛选条件
+                      if (filterCategory !== 'all' && filterCategory !== category) {
+                        return null
+                      }
+                      
+                      // 应用搜索过滤
+                      const filteredOptions = options.filter(option => 
+                        option.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                      
+                      return (
+                        <div key={category} className="interest-category">
+                          <h3 className="category-title">
+                            {{
+                              hobbies: '爱好',
+                              sports: '运动',
+                              music: '音乐',
+                              movies: '电影',
+                              books: '书籍',
+                              food: '美食',
+                              travel: '旅行',
+                              personality: '性格特点',
+                              career: '职业',
+                              entertainment: '娱乐',
+                              lifestyle: '生活方式',
+                              values: '价值观'
+                            }[category]}
+                          </h3>
+                          
+                          <div className="interest-options">
+                            {filteredOptions.map(option => (
+                              <button
+                                key={option}
+                                className={`interest-option ${interests[category].includes(option) ? 'selected' : ''}`}
+                                onClick={() => {
+                                  handleInterestChange(category, option);
+                                }}
+                              >
+                                {option}
+                              </button>
+                            ))}
+                          </div>
+                          
+                          <div className="custom-interest">
+                            <input
+                              type="text"
+                              placeholder="自定义选项"
+                              value={customInterests[category] || ''}
+                              onChange={(e) => handleCustomInterest(category, e.target.value)}
+                              className="custom-interest-input"
+                            />
                             <button
-                              key={option}
-                              className={`interest-option ${interests[category].includes(option) ? 'selected' : ''}`}
-                              onClick={() => {
-                                handleInterestChange(category, option);
-                              }}
+                              className="add-interest-button"
+                              onClick={() => addCustomInterest(category)}
                             >
-                              {option}
+                              添加
                             </button>
-                          ))}
+                          </div>
                         </div>
-                        
-                        <div className="custom-interest">
-                          <input
-                            type="text"
-                            placeholder="自定义选项"
-                            value={customInterests[category] || ''}
-                            onChange={(e) => handleCustomInterest(category, e.target.value)}
-                            className="custom-interest-input"
-                          />
-                          <button
-                            className="add-interest-button"
-                            onClick={() => addCustomInterest(category)}
-                          >
-                            添加
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  })
-                  
-                  <div className="action-buttons">
-                    <button className="primary-button" onClick={saveInterests}>
-                      保存兴趣
-                    </button>
-                    <button className="secondary-button" onClick={findMatches}>
-                      查找匹配
-                    </button>
+                      )
+                    })}
+                    
+                    <div className="action-buttons">
+                      <button className="primary-button" onClick={saveInterests}>
+                        保存兴趣
+                      </button>
+                      <button className="secondary-button" onClick={findMatches}>
+                        查找匹配
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
