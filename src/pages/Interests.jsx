@@ -86,17 +86,232 @@ function Interests({ user, setUser }) {
   const [contentRecommendations, setContentRecommendations] = useState([])
   const [contentFeedback, setContentFeedback] = useState({})
   
+  // 游戏化互动卡片系统
+  const [isInteractiveCards, setIsInteractiveCards] = useState(false)
+  const [currentCardIndex, setCurrentCardIndex] = useState(0)
+  const [cardAnswers, setCardAnswers] = useState({})
+  const [cardProgress, setCardProgress] = useState(0)
+  const [cardResults, setCardResults] = useState(null)
+  
+  // 成就系统
+  const [achievements, setAchievements] = useState([])
+  const [showAchievements, setShowAchievements] = useState(false)
+  
   // MBTI相关状态
   const [mbtiAnswers, setMbtiAnswers] = useState({})
   const [mbtiResult, setMbtiResult] = useState(null)
   const [testProgress, setTestProgress] = useState(0)
+  
+  // 基于emoji的行为偏好表达系统
+  const emojiInterestMap = {
+    hobbies: {
+      '阅读': '📚',
+      '旅行': '✈️',
+      '运动': '🏃',
+      '音乐': '🎵',
+      '电影': '🎬',
+      '烹饪': '🍳',
+      '摄影': '📷',
+      '绘画': '🎨',
+      '编程': '💻',
+      '游戏': '🎮',
+      '手工': '✂️',
+      '舞蹈': '💃',
+      '书法': '✍️',
+      '棋类': '♟️',
+      '收藏': '🎯',
+      '园艺': '🌱',
+      '宠物': '🐱'
+    },
+    sports: {
+      '篮球': '🏀',
+      '足球': '⚽',
+      '羽毛球': '🏸',
+      '乒乓球': '🏓',
+      '游泳': '🏊',
+      '跑步': '🏃',
+      '健身': '💪',
+      '瑜伽': '🧘',
+      '网球': '🎾',
+      '排球': '🏐',
+      '棒球': '⚾',
+      '高尔夫': '⛳',
+      '武术': '🥋',
+      '攀岩': '🧗',
+      '骑行': '🚴',
+      '滑雪': '⛷️',
+      '其他': '🏃'
+    },
+    music: {
+      '流行': '🎤',
+      '摇滚': '🤘',
+      '古典': '🎻',
+      '爵士': '🎷',
+      '电子': '🎧',
+      '民谣': '🎸',
+      '说唱': '🎤',
+      'R&B': '🎵',
+      '乡村': '🎸',
+      '金属': '🤘',
+      '嘻哈': '🎤',
+      '拉丁': '💃',
+      '蓝调': '🎷',
+      '新世纪': '🌅',
+      '国风': '🎶',
+      '其他': '🎵'
+    },
+    movies: {
+      '动作': '💥',
+      '喜剧': '😂',
+      '科幻': '🚀',
+      '悬疑': '🔍',
+      '爱情': '❤️',
+      '动画': '🎭',
+      '纪录片': '🎥',
+      '恐怖': '😱',
+      '战争': '⚔️',
+      '武侠': '⚔️',
+      '奇幻': '🧙',
+      '惊悚': '😨',
+      '剧情': '🎬',
+      '犯罪': '🔪',
+      '其他': '🎬'
+    },
+    books: {
+      '小说': '📖',
+      '散文': '✍️',
+      '历史': '📜',
+      '哲学': '🤔',
+      '科技': '🔬',
+      '科幻': '🚀',
+      '悬疑': '🔍',
+      '言情': '❤️',
+      '传记': '📚',
+      '诗歌': '📝',
+      '心理学': '🧠',
+      '经济学': '💰',
+      '管理学': '📊',
+      '艺术': '🎨',
+      '教育': '🎓',
+      '其他': '📚'
+    },
+    food: {
+      '中餐': '🍜',
+      '西餐': '🍔',
+      '日料': '🍣',
+      '韩料': '🍲',
+      '素食': '🥗',
+      '甜点': '🍰',
+      '海鲜': '🦞',
+      '烧烤': '🍖',
+      '火锅': '🍲',
+      '川菜': '🌶️',
+      '粤菜': '🍤',
+      '鲁菜': '🍖',
+      '淮扬菜': '🍲',
+      '东北菜': '🍖',
+      '东南亚菜': '🍜',
+      '其他': '🍽️'
+    },
+    travel: {
+      '城市游': '🏙️',
+      '自然风光': '🏞️',
+      '历史古迹': '🏛️',
+      '美食之旅': '🍽️',
+      '户外探险': '🧗',
+      '主题公园': '🎢',
+      '海岛度假': '🏖️',
+      '文化体验': '🎭',
+      '背包旅行': '🎒',
+      '自驾游': '🚗',
+      '邮轮': '🚢',
+      '徒步': '🚶',
+      '摄影之旅': '📷',
+      '亲子游': '👨‍👩‍👧‍👦',
+      '蜜月游': '❤️',
+      '其他': '✈️'
+    },
+    personality: {
+      '开朗': '😃',
+      '内向': '😌',
+      '幽默': '😄',
+      '稳重': '🧐',
+      '创意': '💡',
+      '理性': '🤔',
+      '感性': '❤️',
+      '冒险': '⛰️',
+      '细心': '🔍',
+      '自信': '💪',
+      '谦虚': '🙇',
+      '热情': '🔥',
+      '冷静': '❄️',
+      '果断': '⚡',
+      '耐心': '⏳',
+      '其他': '😊'
+    },
+    career: {
+      '技术': '💻',
+      '管理': '📊',
+      '创业': '🚀',
+      '教育': '🎓',
+      '医疗': '🏥',
+      '法律': '⚖️',
+      '金融': '💰',
+      '艺术': '🎨',
+      '媒体': '📺',
+      '科研': '🔬',
+      '设计': '🎨',
+      '销售': '💼',
+      '服务': '🛎️',
+      '其他': '💼'
+    },
+    entertainment: {
+      '刷剧': '📺',
+      '看电影': '🎬',
+      '听音乐': '🎧',
+      '玩游戏': '🎮',
+      '看综艺': '🎭',
+      '唱K': '🎤',
+      '蹦迪': '💃',
+      '桌游': '🎲',
+      '密室逃脱': '🔐',
+      '剧本杀': '📜',
+      '其他': '🎭'
+    },
+    lifestyle: {
+      '极简': '🧘',
+      '精致': '✨',
+      '运动': '🏃',
+      '文艺': '🎨',
+      '科技': '💻',
+      '复古': '📻',
+      '潮流': '🔥',
+      '传统': '🏮',
+      '健康': '💪',
+      '时尚': '👗',
+      '其他': '🌟'
+    },
+    values: {
+      '家庭': '🏠',
+      '事业': '💼',
+      '友谊': '🤝',
+      '健康': '💪',
+      '财富': '💰',
+      '教育': '🎓',
+      '自由': '🕊️',
+      '责任': '👮',
+      '创新': '💡',
+      '传统': '🏮',
+      '其他': '🌟'
+    }
+  }
   
   // 兴趣选项配置 - 扩展为更丰富的标签体系
   const interestOptions = {
     hobbies: ['阅读', '旅行', '运动', '音乐', '电影', '烹饪', '摄影', '绘画', '编程', '游戏', '手工', '舞蹈', '书法', '棋类', '收藏', '园艺', '宠物'],
     sports: ['篮球', '足球', '羽毛球', '乒乓球', '游泳', '跑步', '健身', '瑜伽', '网球', '排球', '棒球', '高尔夫', '武术', '攀岩', '骑行', '滑雪', '其他'],
     music: ['流行', '摇滚', '古典', '爵士', '电子', '民谣', '说唱', 'R&B', '乡村', '金属', '嘻哈', '拉丁', '蓝调', '新世纪', '国风', '其他'],
-    movies: ['动作', '喜剧', '科幻', '悬疑', '爱情', '动画', '纪录片', '恐怖', '战争', '武侠', '奇幻', '惊悚', '剧情', '犯罪', '科幻', '其他'],
+    movies: ['动作', '喜剧', '科幻', '悬疑', '爱情', '动画', '纪录片', '恐怖', '战争', '武侠', '奇幻', '惊悚', '剧情', '犯罪', '其他'],
     books: ['小说', '散文', '历史', '哲学', '科技', '科幻', '悬疑', '言情', '传记', '诗歌', '心理学', '经济学', '管理学', '艺术', '教育', '其他'],
     food: ['中餐', '西餐', '日料', '韩料', '素食', '甜点', '海鲜', '烧烤', '火锅', '川菜', '粤菜', '鲁菜', '淮扬菜', '东北菜', '东南亚菜', '其他'],
     travel: ['城市游', '自然风光', '历史古迹', '美食之旅', '户外探险', '主题公园', '海岛度假', '文化体验', '背包旅行', '自驾游', '邮轮', '徒步', '摄影之旅', '亲子游', '蜜月游', '其他'],
@@ -1058,6 +1273,266 @@ function Interests({ user, setUser }) {
     }
   }
   
+  // 互动卡片系统
+  const startInteractiveCards = () => {
+    const cards = [
+      {
+        id: 'card1',
+        category: 'hobbies',
+        title: '你喜欢阅读吗？',
+        emoji: '📚',
+        options: [
+          { value: '阅读', text: '非常喜欢', score: 5 },
+          { value: '阅读', text: '比较喜欢', score: 4 },
+          { value: '阅读', text: '一般', score: 3 },
+          { value: '阅读', text: '不太喜欢', score: 2 },
+          { value: '阅读', text: '不喜欢', score: 1 }
+        ]
+      },
+      {
+        id: 'card2',
+        category: 'sports',
+        title: '你喜欢运动吗？',
+        emoji: '🏃',
+        options: [
+          { value: '运动', text: '非常喜欢', score: 5 },
+          { value: '运动', text: '比较喜欢', score: 4 },
+          { value: '运动', text: '一般', score: 3 },
+          { value: '运动', text: '不太喜欢', score: 2 },
+          { value: '运动', text: '不喜欢', score: 1 }
+        ]
+      },
+      {
+        id: 'card3',
+        category: 'music',
+        title: '你喜欢音乐吗？',
+        emoji: '🎵',
+        options: [
+          { value: '音乐', text: '非常喜欢', score: 5 },
+          { value: '音乐', text: '比较喜欢', score: 4 },
+          { value: '音乐', text: '一般', score: 3 },
+          { value: '音乐', text: '不太喜欢', score: 2 },
+          { value: '音乐', text: '不喜欢', score: 1 }
+        ]
+      },
+      {
+        id: 'card4',
+        category: 'movies',
+        title: '你喜欢看电影吗？',
+        emoji: '🎬',
+        options: [
+          { value: '电影', text: '非常喜欢', score: 5 },
+          { value: '电影', text: '比较喜欢', score: 4 },
+          { value: '电影', text: '一般', score: 3 },
+          { value: '电影', text: '不太喜欢', score: 2 },
+          { value: '电影', text: '不喜欢', score: 1 }
+        ]
+      },
+      {
+        id: 'card5',
+        category: 'travel',
+        title: '你喜欢旅行吗？',
+        emoji: '✈️',
+        options: [
+          { value: '旅行', text: '非常喜欢', score: 5 },
+          { value: '旅行', text: '比较喜欢', score: 4 },
+          { value: '旅行', text: '一般', score: 3 },
+          { value: '旅行', text: '不太喜欢', score: 2 },
+          { value: '旅行', text: '不喜欢', score: 1 }
+        ]
+      },
+      {
+        id: 'card6',
+        category: 'food',
+        title: '你喜欢尝试新美食吗？',
+        emoji: '🍜',
+        options: [
+          { value: '美食', text: '非常喜欢', score: 5 },
+          { value: '美食', text: '比较喜欢', score: 4 },
+          { value: '美食', text: '一般', score: 3 },
+          { value: '美食', text: '不太喜欢', score: 2 },
+          { value: '美食', text: '不喜欢', score: 1 }
+        ]
+      },
+      {
+        id: 'card7',
+        category: 'entertainment',
+        title: '你喜欢玩游戏吗？',
+        emoji: '🎮',
+        options: [
+          { value: '游戏', text: '非常喜欢', score: 5 },
+          { value: '游戏', text: '比较喜欢', score: 4 },
+          { value: '游戏', text: '一般', score: 3 },
+          { value: '游戏', text: '不太喜欢', score: 2 },
+          { value: '游戏', text: '不喜欢', score: 1 }
+        ]
+      },
+      {
+        id: 'card8',
+        category: 'personality',
+        title: '你认为自己是开朗的人吗？',
+        emoji: '😃',
+        options: [
+          { value: '开朗', text: '非常开朗', score: 5 },
+          { value: '开朗', text: '比较开朗', score: 4 },
+          { value: '开朗', text: '一般', score: 3 },
+          { value: '开朗', text: '不太开朗', score: 2 },
+          { value: '开朗', text: '不开朗', score: 1 }
+        ]
+      }
+    ]
+    
+    setCurrentCardIndex(0)
+    setCardAnswers({})
+    setCardProgress(0)
+    setCardResults(null)
+    setIsInteractiveCards(true)
+  }
+  
+  const handleCardAnswer = (cardId, value, score) => {
+    setCardAnswers(prev => ({
+      ...prev,
+      [cardId]: { value, score }
+    }))
+    
+    // 更新进度
+    const answeredCount = Object.keys({ ...cardAnswers, [cardId]: { value, score } }).length
+    setCardProgress(Math.round((answeredCount / 8) * 100))
+    
+    // 延迟后进入下一张卡片
+    setTimeout(() => {
+      if (currentCardIndex < 7) {
+        setCurrentCardIndex(prev => prev + 1)
+      } else {
+        calculateCardResults()
+      }
+    }, 500)
+  }
+  
+  const calculateCardResults = () => {
+    // 统计结果
+    const results = []
+    let totalScore = 0
+    
+    Object.entries(cardAnswers).forEach(([cardId, answer]) => {
+      const card = [
+        {
+          id: 'card1',
+          category: 'hobbies',
+          title: '你喜欢阅读吗？',
+          emoji: '📚'
+        },
+        {
+          id: 'card2',
+          category: 'sports',
+          title: '你喜欢运动吗？',
+          emoji: '🏃'
+        },
+        {
+          id: 'card3',
+          category: 'music',
+          title: '你喜欢音乐吗？',
+          emoji: '🎵'
+        },
+        {
+          id: 'card4',
+          category: 'movies',
+          title: '你喜欢看电影吗？',
+          emoji: '🎬'
+        },
+        {
+          id: 'card5',
+          category: 'travel',
+          title: '你喜欢旅行吗？',
+          emoji: '✈️'
+        },
+        {
+          id: 'card6',
+          category: 'food',
+          title: '你喜欢尝试新美食吗？',
+          emoji: '🍜'
+        },
+        {
+          id: 'card7',
+          category: 'entertainment',
+          title: '你喜欢玩游戏吗？',
+          emoji: '🎮'
+        },
+        {
+          id: 'card8',
+          category: 'personality',
+          title: '你认为自己是开朗的人吗？',
+          emoji: '😃'
+        }
+      ].find(c => c.id === cardId)
+      
+      if (card) {
+        results.push({
+          category: card.category,
+          interest: answer.value,
+          score: answer.score,
+          emoji: card.emoji
+        })
+        totalScore += answer.score
+      }
+    })
+    
+    setCardResults(results)
+    
+    // 自动添加兴趣（只添加分数≥4的兴趣）
+    results.filter(result => result.score >= 4).forEach(result => {
+      handleInterestChange(result.category, result.interest)
+    })
+    
+    // 解锁成就
+    unlockAchievements(results, totalScore)
+  }
+  
+  // 解锁成就
+  const unlockAchievements = (results, totalScore) => {
+    const newAchievements = []
+    
+    // 基于总分的成就
+    if (totalScore >= 35) {
+      newAchievements.push({
+        id: 'achievement1',
+        title: '兴趣广泛',
+        description: '完成了所有兴趣卡片，总分超过35分',
+        emoji: '🌟',
+        unlockedAt: new Date().toISOString()
+      })
+    }
+    
+    // 基于特定兴趣的成就
+    const highInterestCount = results.filter(r => r.score === 5).length
+    if (highInterestCount >= 3) {
+      newAchievements.push({
+        id: 'achievement2',
+        title: '热情似火',
+        description: '对3个或更多兴趣表示了极高的热情',
+        emoji: '🔥',
+        unlockedAt: new Date().toISOString()
+      })
+    }
+    
+    // 基于特定类别的成就
+    const sportsScore = results.find(r => r.category === 'sports')?.score || 0
+    if (sportsScore === 5) {
+      newAchievements.push({
+        id: 'achievement3',
+        title: '运动达人',
+        description: '对运动表示了极高的热情',
+        emoji: '💪',
+        unlockedAt: new Date().toISOString()
+      })
+    }
+    
+    if (newAchievements.length > 0) {
+      setAchievements(prev => [...prev, ...newAchievements])
+      setShowAchievements(true)
+    }
+  }
+  
   // 优化的匹配算法 - 已经在前面定义
 
   return (
@@ -1200,6 +1675,9 @@ function Interests({ user, setUser }) {
                         </button>
                         <button className="interactive-button" onClick={startPreferenceTest}>
                           偏好测试
+                        </button>
+                        <button className="interactive-button" onClick={startInteractiveCards}>
+                          互动卡片
                         </button>
                         <button className="interactive-button" onClick={generateContentRecommendations}>
                           内容推荐
@@ -1534,7 +2012,7 @@ function Interests({ user, setUser }) {
                             className={`preference-button ${preferenceAnswers[pair.id] === 'A' ? 'selected' : ''}`}
                             onClick={() => handlePreferenceAnswer(pair.id, 'A')}
                           >
-                            {{
+                            {{ 
                               hobbies: '爱好',
                               sports: '运动',
                               music: '音乐',
@@ -1554,7 +2032,7 @@ function Interests({ user, setUser }) {
                             className={`preference-button ${preferenceAnswers[pair.id] === 'B' ? 'selected' : ''}`}
                             onClick={() => handlePreferenceAnswer(pair.id, 'B')}
                           >
-                            {{
+                            {{ 
                               hobbies: '爱好',
                               sports: '运动',
                               music: '音乐',
@@ -1581,6 +2059,177 @@ function Interests({ user, setUser }) {
                     <button className="secondary-button" onClick={() => setIsPreferenceTest(false)}>
                       取消
                     </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* 互动卡片界面 */}
+              {isInteractiveCards && (
+                <div className="tab-content">
+                  <h2 className="section-title">兴趣卡片</h2>
+                  <p className="section-description">滑动卡片，表达你的兴趣偏好</p>
+                  
+                  {/* 测试进度条 */}
+                  <div className="progress-container">
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{ width: `${cardProgress}%` }}
+                      />
+                    </div>
+                    <p className="progress-text">进度: {cardProgress}%</p>
+                  </div>
+                  
+                  {/* 互动卡片 */}
+                  <div className="interactive-cards-container">
+                    {!cardResults && (
+                      <div className="card-wrapper">
+                        <div className="interactive-card">
+                          <div className="card-emoji">
+                            {[
+                              { id: 'card1', emoji: '📚' },
+                              { id: 'card2', emoji: '🏃' },
+                              { id: 'card3', emoji: '🎵' },
+                              { id: 'card4', emoji: '🎬' },
+                              { id: 'card5', emoji: '✈️' },
+                              { id: 'card6', emoji: '🍜' },
+                              { id: 'card7', emoji: '🎮' },
+                              { id: 'card8', emoji: '😃' }
+                            ][currentCardIndex].emoji}
+                          </div>
+                          <h3 className="card-title">
+                            {[
+                              { id: 'card1', title: '你喜欢阅读吗？' },
+                              { id: 'card2', title: '你喜欢运动吗？' },
+                              { id: 'card3', title: '你喜欢音乐吗？' },
+                              { id: 'card4', title: '你喜欢看电影吗？' },
+                              { id: 'card5', title: '你喜欢旅行吗？' },
+                              { id: 'card6', title: '你喜欢尝试新美食吗？' },
+                              { id: 'card7', title: '你喜欢玩游戏吗？' },
+                              { id: 'card8', title: '你认为自己是开朗的人吗？' }
+                            ][currentCardIndex].title}
+                          </h3>
+                          <div className="card-options">
+                            {[
+                              [
+                                { value: '阅读', text: '非常喜欢', score: 5 },
+                                { value: '阅读', text: '比较喜欢', score: 4 },
+                                { value: '阅读', text: '一般', score: 3 },
+                                { value: '阅读', text: '不太喜欢', score: 2 },
+                                { value: '阅读', text: '不喜欢', score: 1 }
+                              ],
+                              [
+                                { value: '运动', text: '非常喜欢', score: 5 },
+                                { value: '运动', text: '比较喜欢', score: 4 },
+                                { value: '运动', text: '一般', score: 3 },
+                                { value: '运动', text: '不太喜欢', score: 2 },
+                                { value: '运动', text: '不喜欢', score: 1 }
+                              ],
+                              [
+                                { value: '音乐', text: '非常喜欢', score: 5 },
+                                { value: '音乐', text: '比较喜欢', score: 4 },
+                                { value: '音乐', text: '一般', score: 3 },
+                                { value: '音乐', text: '不太喜欢', score: 2 },
+                                { value: '音乐', text: '不喜欢', score: 1 }
+                              ],
+                              [
+                                { value: '电影', text: '非常喜欢', score: 5 },
+                                { value: '电影', text: '比较喜欢', score: 4 },
+                                { value: '电影', text: '一般', score: 3 },
+                                { value: '电影', text: '不太喜欢', score: 2 },
+                                { value: '电影', text: '不喜欢', score: 1 }
+                              ],
+                              [
+                                { value: '旅行', text: '非常喜欢', score: 5 },
+                                { value: '旅行', text: '比较喜欢', score: 4 },
+                                { value: '旅行', text: '一般', score: 3 },
+                                { value: '旅行', text: '不太喜欢', score: 2 },
+                                { value: '旅行', text: '不喜欢', score: 1 }
+                              ],
+                              [
+                                { value: '美食', text: '非常喜欢', score: 5 },
+                                { value: '美食', text: '比较喜欢', score: 4 },
+                                { value: '美食', text: '一般', score: 3 },
+                                { value: '美食', text: '不太喜欢', score: 2 },
+                                { value: '美食', text: '不喜欢', score: 1 }
+                              ],
+                              [
+                                { value: '游戏', text: '非常喜欢', score: 5 },
+                                { value: '游戏', text: '比较喜欢', score: 4 },
+                                { value: '游戏', text: '一般', score: 3 },
+                                { value: '游戏', text: '不太喜欢', score: 2 },
+                                { value: '游戏', text: '不喜欢', score: 1 }
+                              ],
+                              [
+                                { value: '开朗', text: '非常开朗', score: 5 },
+                                { value: '开朗', text: '比较开朗', score: 4 },
+                                { value: '开朗', text: '一般', score: 3 },
+                                { value: '开朗', text: '不太开朗', score: 2 },
+                                { value: '开朗', text: '不开朗', score: 1 }
+                              ]
+                            ][currentCardIndex].map((option, index) => (
+                              <button
+                                key={index}
+                                className="card-option-button"
+                                onClick={() => handleCardAnswer(
+                                  ['card1', 'card2', 'card3', 'card4', 'card5', 'card6', 'card7', 'card8'][currentCardIndex],
+                                  option.value,
+                                  option.score
+                                )}
+                              >
+                                {option.text}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* 卡片结果 */}
+                    {cardResults && (
+                      <div className="card-results">
+                        <h3 className="results-title">你的兴趣分析</h3>
+                        <div className="card-results-list">
+                          {cardResults.map((result, index) => (
+                            <div key={index} className="card-result-item">
+                              <span className="result-emoji">{result.emoji}</span>
+                              <span className="result-interest">{result.interest}</span>
+                              <div className="result-score">
+                                <div className="score-bar">
+                                  <div 
+                                    className="score-fill" 
+                                    style={{ width: `${(result.score / 5) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="score-text">{result.score}/5</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* 成就展示 */}
+                        {achievements.length > 0 && (
+                          <div className="achievements-section">
+                            <h4 className="achievements-title">🏆 成就解锁</h4>
+                            <div className="achievements-list">
+                              {achievements.map((achievement, index) => (
+                                <div key={achievement.id} className="achievement-item">
+                                  <span className="achievement-emoji">{achievement.emoji}</span>
+                                  <div className="achievement-info">
+                                    <h5 className="achievement-title">{achievement.title}</h5>
+                                    <p className="achievement-description">{achievement.description}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <button className="secondary-button" onClick={() => setIsInteractiveCards(false)}>
+                          返回兴趣设置
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
