@@ -12,7 +12,11 @@ function Interests({ user, setUser }) {
     books: [],
     food: [],
     travel: [],
-    personality: []
+    personality: [],
+    career: [],
+    entertainment: [],
+    lifestyle: [],
+    values: []
   })
   
   // 价值观问卷状态
@@ -65,21 +69,42 @@ function Interests({ user, setUser }) {
   const [recommendedInterests, setRecommendedInterests] = useState({})
   const [showRecommendations, setShowRecommendations] = useState(false)
   
+  // 互动式兴趣探索功能
+  const [isInterestQuiz, setIsInterestQuiz] = useState(false)
+  const [quizQuestions, setQuizQuestions] = useState([])
+  const [quizAnswers, setQuizAnswers] = useState({})
+  const [quizProgress, setQuizProgress] = useState(0)
+  const [quizResults, setQuizResults] = useState(null)
+  
+  // 偏好测试功能
+  const [isPreferenceTest, setIsPreferenceTest] = useState(false)
+  const [preferencePairs, setPreferencePairs] = useState([])
+  const [preferenceAnswers, setPreferenceAnswers] = useState({})
+  const [preferenceProgress, setPreferenceProgress] = useState(0)
+  
+  // 内容推荐反馈
+  const [contentRecommendations, setContentRecommendations] = useState([])
+  const [contentFeedback, setContentFeedback] = useState({})
+  
   // MBTI相关状态
   const [mbtiAnswers, setMbtiAnswers] = useState({})
   const [mbtiResult, setMbtiResult] = useState(null)
   const [testProgress, setTestProgress] = useState(0)
   
-  // 兴趣选项配置
+  // 兴趣选项配置 - 扩展为更丰富的标签体系
   const interestOptions = {
-    hobbies: ['阅读', '旅行', '运动', '音乐', '电影', '烹饪', '摄影', '绘画', '编程', '游戏'],
-    sports: ['篮球', '足球', '羽毛球', '乒乓球', '游泳', '跑步', '健身', '瑜伽', '网球', '其他'],
-    music: ['流行', '摇滚', '古典', '爵士', '电子', '民谣', '说唱', 'R&B', '乡村', '其他'],
-    movies: ['动作', '喜剧', '科幻', '悬疑', '爱情', '动画', '纪录片', '恐怖', '战争', '其他'],
-    books: ['小说', '散文', '历史', '哲学', '科技', '科幻', '悬疑', '言情', '传记', '其他'],
-    food: ['中餐', '西餐', '日料', '韩料', '素食', '甜点', '海鲜', '烧烤', '火锅', '其他'],
-    travel: ['城市游', '自然风光', '历史古迹', '美食之旅', '户外探险', '主题公园', '海岛度假', '文化体验', '背包旅行', '其他'],
-    personality: ['开朗', '内向', '幽默', '稳重', '创意', '理性', '感性', '冒险', '细心', '其他']
+    hobbies: ['阅读', '旅行', '运动', '音乐', '电影', '烹饪', '摄影', '绘画', '编程', '游戏', '手工', '舞蹈', '书法', '棋类', '收藏', '园艺', '宠物'],
+    sports: ['篮球', '足球', '羽毛球', '乒乓球', '游泳', '跑步', '健身', '瑜伽', '网球', '排球', '棒球', '高尔夫', '武术', '攀岩', '骑行', '滑雪', '其他'],
+    music: ['流行', '摇滚', '古典', '爵士', '电子', '民谣', '说唱', 'R&B', '乡村', '金属', '嘻哈', '拉丁', '蓝调', '新世纪', '国风', '其他'],
+    movies: ['动作', '喜剧', '科幻', '悬疑', '爱情', '动画', '纪录片', '恐怖', '战争', '武侠', '奇幻', '惊悚', '剧情', '犯罪', '科幻', '其他'],
+    books: ['小说', '散文', '历史', '哲学', '科技', '科幻', '悬疑', '言情', '传记', '诗歌', '心理学', '经济学', '管理学', '艺术', '教育', '其他'],
+    food: ['中餐', '西餐', '日料', '韩料', '素食', '甜点', '海鲜', '烧烤', '火锅', '川菜', '粤菜', '鲁菜', '淮扬菜', '东北菜', '东南亚菜', '其他'],
+    travel: ['城市游', '自然风光', '历史古迹', '美食之旅', '户外探险', '主题公园', '海岛度假', '文化体验', '背包旅行', '自驾游', '邮轮', '徒步', '摄影之旅', '亲子游', '蜜月游', '其他'],
+    personality: ['开朗', '内向', '幽默', '稳重', '创意', '理性', '感性', '冒险', '细心', '自信', '谦虚', '热情', '冷静', '果断', '耐心', '其他'],
+    career: ['技术', '管理', '创业', '教育', '医疗', '法律', '金融', '艺术', '媒体', '科研', '设计', '销售', '服务', '其他'],
+    entertainment: ['刷剧', '看电影', '听音乐', '玩游戏', '看综艺', '唱K', '蹦迪', '桌游', '密室逃脱', '剧本杀', '其他'],
+    lifestyle: ['极简', '精致', '运动', '文艺', '科技', '复古', '潮流', '传统', '健康', '时尚', '其他'],
+    values: ['家庭', '事业', '友谊', '健康', '财富', '教育', '自由', '责任', '创新', '传统', '其他']
   }
   
   // MBTI测试题目
@@ -797,6 +822,317 @@ function Interests({ user, setUser }) {
     setMbtiResult(null)
     setTestProgress(0)
   }
+  
+  // 兴趣问答功能
+  const startInterestQuiz = () => {
+    const questions = [
+      {
+        id: 'quiz1',
+        question: '周末你更喜欢如何度过？',
+        options: [
+          { value: ['hobbies', '阅读'], text: '在家阅读一本好书' },
+          { value: ['sports', '健身'], text: '去健身房锻炼' },
+          { value: ['travel', '城市游'], text: '探索城市新景点' },
+          { value: ['entertainment', '刷剧'], text: '在家刷剧看电影' }
+        ]
+      },
+      {
+        id: 'quiz2',
+        question: '你更喜欢哪种类型的音乐？',
+        options: [
+          { value: ['music', '流行'], text: '流行音乐' },
+          { value: ['music', '摇滚'], text: '摇滚音乐' },
+          { value: ['music', '古典'], text: '古典音乐' },
+          { value: ['music', '电子'], text: '电子音乐' }
+        ]
+      },
+      {
+        id: 'quiz3',
+        question: '你最喜欢的电影类型是？',
+        options: [
+          { value: ['movies', '科幻'], text: '科幻片' },
+          { value: ['movies', '喜剧'], text: '喜剧片' },
+          { value: ['movies', '爱情'], text: '爱情片' },
+          { value: ['movies', '悬疑'], text: '悬疑片' }
+        ]
+      },
+      {
+        id: 'quiz4',
+        question: '你理想的旅行方式是？',
+        options: [
+          { value: ['travel', '背包旅行'], text: '背包自由行' },
+          { value: ['travel', '美食之旅'], text: '美食之旅' },
+          { value: ['travel', '海岛度假'], text: '海岛度假' },
+          { value: ['travel', '文化体验'], text: '文化体验之旅' }
+        ]
+      },
+      {
+        id: 'quiz5',
+        question: '你平时喜欢的娱乐活动是？',
+        options: [
+          { value: ['entertainment', '玩游戏'], text: '玩游戏' },
+          { value: ['entertainment', '唱K'], text: '唱K' },
+          { value: ['entertainment', '桌游'], text: '玩桌游' },
+          { value: ['entertainment', '剧本杀'], text: '玩剧本杀' }
+        ]
+      }
+    ]
+    
+    setQuizQuestions(questions)
+    setQuizAnswers({})
+    setQuizProgress(0)
+    setQuizResults(null)
+    setIsInterestQuiz(true)
+  }
+  
+  const handleQuizAnswer = (questionId, value) => {
+    setQuizAnswers(prev => ({
+      ...prev,
+      [questionId]: value
+    }))
+    
+    // 更新进度
+    const answeredCount = Object.keys({ ...quizAnswers, [questionId]: value }).length
+    setQuizProgress(Math.round((answeredCount / quizQuestions.length) * 100))
+  }
+  
+  const calculateQuizResults = () => {
+    if (Object.keys(quizAnswers).length < quizQuestions.length) {
+      alert('请完成所有问题！')
+      return
+    }
+    
+    // 统计兴趣
+    const interestCounts = {}
+    Object.values(quizAnswers).forEach(value => {
+      const [category, interest] = value
+      if (!interestCounts[category]) {
+        interestCounts[category] = {}
+      }
+      if (!interestCounts[category][interest]) {
+        interestCounts[category][interest] = 0
+      }
+      interestCounts[category][interest]++
+    })
+    
+    // 生成结果
+    const results = Object.entries(interestCounts).map(([category, counts]) => {
+      const topInterest = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])[0]
+      return {
+        category,
+        interest: topInterest[0],
+        count: topInterest[1]
+      }
+    })
+    
+    setQuizResults(results)
+    
+    // 自动添加兴趣
+    results.forEach(result => {
+      handleInterestChange(result.category, result.interest)
+    })
+  }
+  
+  // 偏好测试功能
+  const startPreferenceTest = () => {
+    const pairs = [
+      {
+        id: 'pref1',
+        optionA: { category: 'hobbies', interest: '阅读' },
+        optionB: { category: 'sports', interest: '运动' }
+      },
+      {
+        id: 'pref2',
+        optionA: { category: 'music', interest: '流行' },
+        optionB: { category: 'music', interest: '古典' }
+      },
+      {
+        id: 'pref3',
+        optionA: { category: 'movies', interest: '科幻' },
+        optionB: { category: 'movies', interest: '爱情' }
+      },
+      {
+        id: 'pref4',
+        optionA: { category: 'travel', interest: '城市游' },
+        optionB: { category: 'travel', interest: '自然风光' }
+      },
+      {
+        id: 'pref5',
+        optionA: { category: 'food', interest: '中餐' },
+        optionB: { category: 'food', interest: '西餐' }
+      }
+    ]
+    
+    setPreferencePairs(pairs)
+    setPreferenceAnswers({})
+    setPreferenceProgress(0)
+    setIsPreferenceTest(true)
+  }
+  
+  const handlePreferenceAnswer = (questionId, value) => {
+    setPreferenceAnswers(prev => ({
+      ...prev,
+      [questionId]: value
+    }))
+    
+    // 更新进度
+    const answeredCount = Object.keys({ ...preferenceAnswers, [questionId]: value }).length
+    setPreferenceProgress(Math.round((answeredCount / preferencePairs.length) * 100))
+  }
+  
+  const completePreferenceTest = () => {
+    if (Object.keys(preferenceAnswers).length < preferencePairs.length) {
+      alert('请完成所有问题！')
+      return
+    }
+    
+    // 统计偏好
+    const preferences = {}
+    Object.entries(preferenceAnswers).forEach(([questionId, value]) => {
+      const pair = preferencePairs.find(p => p.id === questionId)
+      const selected = value === 'A' ? pair.optionA : pair.optionB
+      if (!preferences[selected.category]) {
+        preferences[selected.category] = {}
+      }
+      if (!preferences[selected.category][selected.interest]) {
+        preferences[selected.category][selected.interest] = 0
+      }
+      preferences[selected.category][selected.interest]++
+    })
+    
+    // 自动添加兴趣
+    Object.entries(preferences).forEach(([category, interests]) => {
+      Object.keys(interests).forEach(interest => {
+        handleInterestChange(category, interest)
+      })
+    })
+    
+    setIsPreferenceTest(false)
+    alert('偏好测试完成！已自动添加您的偏好兴趣。')
+  }
+  
+  // 内容推荐反馈
+  const generateContentRecommendations = () => {
+    const recommendations = [
+      {
+        id: 'content1',
+        title: '《流浪地球3》电影推荐',
+        category: 'movies',
+        interest: '科幻',
+        description: '中国科幻电影的里程碑之作，特效震撼，剧情引人深思。',
+        image: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=movie%20poster%20for%20The%20Wandering%20Earth%203%2C%20sci-fi%2C%20epic&size=512x512'
+      },
+      {
+        id: 'content2',
+        title: '周杰伦2024演唱会',
+        category: 'music',
+        interest: '流行',
+        description: '周杰伦2024全新巡回演唱会，经典歌曲重现，不容错过。',
+        image: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=Jay%20Chou%20concert%20poster%2C%20popular%20music%2C%20stage&size=512x512'
+      },
+      {
+        id: 'content3',
+        title: '《三体》小说推荐',
+        category: 'books',
+        interest: '科幻',
+        description: '刘慈欣的经典科幻小说，宏大的宇宙观和深刻的哲学思考。',
+        image: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=The%20Three-Body%20Problem%20book%20cover%2C%20sci-fi%2C%20cosmic&size=512x512'
+      }
+    ]
+    
+    setContentRecommendations(recommendations)
+    setContentFeedback({})
+  }
+  
+  const handleContentFeedback = (contentId, feedback) => {
+    setContentFeedback(prev => ({
+      ...prev,
+      [contentId]: feedback
+    }))
+    
+    // 根据反馈添加兴趣
+    const content = contentRecommendations.find(c => c.id === contentId)
+    if (feedback === 'like' && content) {
+      handleInterestChange(content.category, content.interest)
+    }
+  }
+  
+  // 优化的匹配算法
+  const calculateMatchScore = (otherUser) => {
+    let totalScore = 0
+    let totalPossible = 0
+    
+    // 为不同类别设置不同权重
+    const categoryWeights = {
+      hobbies: 1.0,
+      sports: 0.8,
+      music: 1.2,
+      movies: 0.9,
+      books: 1.1,
+      food: 0.8,
+      travel: 1.0,
+      personality: 1.3,
+      career: 0.9,
+      entertainment: 0.8,
+      lifestyle: 1.1,
+      values: 1.2
+    }
+    
+    Object.keys(interests).forEach(category => {
+      const userInterests = interests[category]
+      const otherInterests = otherUser.interests?.[category] || []
+      const weight = categoryWeights[category] || 1.0
+      
+      // 计算该类别的匹配度
+      const commonInterests = userInterests.filter(interest => otherInterests.includes(interest))
+      const categoryScore = commonInterests.length
+      const categoryPossible = Math.max(userInterests.length, otherInterests.length)
+      
+      // 考虑兴趣数量的影响（兴趣越多，匹配难度越大）
+      const quantityFactor = Math.min(1.0, 1 / (1 + Math.log(Math.max(userInterests.length, otherInterests.length) + 1)))
+      
+      // 考虑兴趣热度的影响（热门兴趣权重降低）
+      const popularityFactor = 1.0
+      if (interestPopularity[category]) {
+        const popularInterests = interestPopularity[category].map(([interest]) => interest)
+        const commonPopularInterests = commonInterests.filter(interest => popularInterests.includes(interest))
+        if (commonPopularInterests.length > 0) {
+          popularityFactor = 0.8 // 热门兴趣匹配权重降低
+        }
+      }
+      
+      totalScore += categoryScore * weight * quantityFactor * popularityFactor
+      totalPossible += categoryPossible * weight
+    })
+    
+    // 添加价值观匹配分数（权重高）
+    if (Object.values(values).some(v => v > 0) && otherUser.values) {
+      const valuesMatchScore = calculateValuesMatch(values, otherUser.values)
+      const valuesWeight = 1.5
+      totalScore += valuesMatchScore * valuesWeight
+      totalPossible += 10 * valuesWeight
+    }
+    
+    // 添加生活方式匹配分数（权重高）
+    if (Object.values(lifestyle).some(v => v > 0) && otherUser.lifestyle) {
+      const lifestyleMatchScore = calculateLifestyleMatch(lifestyle, otherUser.lifestyle)
+      const lifestyleWeight = 1.5
+      totalScore += lifestyleMatchScore * lifestyleWeight
+      totalPossible += 10 * lifestyleWeight
+    }
+    
+    // 添加MBTI匹配分数（权重更高）
+    if (mbtiResult && otherUser.mbti) {
+      const mbtiMatchScore = calculateMbtiMatch(mbtiResult.type, otherUser.mbti.type)
+      const mbtiWeight = 2.0
+      totalScore += mbtiMatchScore * mbtiWeight
+      totalPossible += 5 * mbtiWeight
+    }
+    
+    // 归一化分数到0-100范围
+    return totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0
+  }
 
   return (
     <div className="interests-page">
@@ -884,7 +1220,11 @@ function Interests({ user, setUser }) {
                             books: '书籍',
                             food: '美食',
                             travel: '旅行',
-                            personality: '性格特点'
+                            personality: '性格特点',
+                            career: '职业',
+                            entertainment: '娱乐',
+                            lifestyle: '生活方式',
+                            values: '价值观'
                           }[category]}
                         </button>
                       ))}
@@ -914,10 +1254,30 @@ function Interests({ user, setUser }) {
                               books: '书籍',
                               food: '美食',
                               travel: '旅行',
-                              personality: '性格特点'
+                              personality: '性格特点',
+                              career: '职业',
+                              entertainment: '娱乐',
+                              lifestyle: '生活方式',
+                              values: '价值观'
                             }[category]}
                           </button>
                         ))}
+                      </div>
+                    </div>
+                    
+                    {/* 互动式兴趣探索 */}
+                    <div className="interactive-section">
+                      <h4 className="section-subtitle">互动式兴趣探索</h4>
+                      <div className="interactive-buttons">
+                        <button className="interactive-button" onClick={startInterestQuiz}>
+                          兴趣问答
+                        </button>
+                        <button className="interactive-button" onClick={startPreferenceTest}>
+                          偏好测试
+                        </button>
+                        <button className="interactive-button" onClick={generateContentRecommendations}>
+                          内容推荐
+                        </button>
                       </div>
                     </div>
                     
@@ -946,7 +1306,11 @@ function Interests({ user, setUser }) {
                                   books: '书籍',
                                   food: '美食',
                                   travel: '旅行',
-                                  personality: '性格特点'
+                                  personality: '性格特点',
+                                  career: '职业',
+                                  entertainment: '娱乐',
+                                  lifestyle: '生活方式',
+                                  values: '价值观'
                                 }[category]}
                               </h5>
                               <div className="popularity-list">
@@ -989,7 +1353,11 @@ function Interests({ user, setUser }) {
                                   books: '书籍',
                                   food: '美食',
                                   travel: '旅行',
-                                  personality: '性格特点'
+                                  personality: '性格特点',
+                                  career: '职业',
+                                  entertainment: '娱乐',
+                                  lifestyle: '生活方式',
+                                  values: '价值观'
                                 }[category]}
                               </h5>
                               <div className="recommendation-list">
@@ -1017,6 +1385,42 @@ function Interests({ user, setUser }) {
                         </div>
                       )}
                     </div>
+                    
+                    {/* 内容推荐反馈 */}
+                    {contentRecommendations.length > 0 && (
+                      <div className="content-recommendations">
+                        <h4 className="section-subtitle">内容推荐</h4>
+                        <div className="content-list">
+                          {contentRecommendations.map(content => (
+                            <div key={content.id} className="content-item">
+                              <img 
+                                src={content.image} 
+                                alt={content.title} 
+                                className="content-image"
+                              />
+                              <div className="content-info">
+                                <h5 className="content-title">{content.title}</h5>
+                                <p className="content-description">{content.description}</p>
+                                <div className="content-feedback">
+                                  <button 
+                                    className={`feedback-button ${contentFeedback[content.id] === 'like' ? 'active' : ''}`}
+                                    onClick={() => handleContentFeedback(content.id, 'like')}
+                                  >
+                                    👍 喜欢
+                                  </button>
+                                  <button 
+                                    className={`feedback-button ${contentFeedback[content.id] === 'dislike' ? 'active' : ''}`}
+                                    onClick={() => handleContentFeedback(content.id, 'dislike')}
+                                  >
+                                    👎 不感兴趣
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   {/* 兴趣选项展示 */}
@@ -1042,7 +1446,11 @@ function Interests({ user, setUser }) {
                             books: '书籍',
                             food: '美食',
                             travel: '旅行',
-                            personality: '性格特点'
+                            personality: '性格特点',
+                            career: '职业',
+                            entertainment: '娱乐',
+                            lifestyle: '生活方式',
+                            values: '价值观'
                           }[category]}
                         </h3>
                         
@@ -1077,7 +1485,7 @@ function Interests({ user, setUser }) {
                         </div>
                       </div>
                     )
-                  })}
+                  })
                   
                   <div className="action-buttons">
                     <button className="primary-button" onClick={saveInterests}>
@@ -1085,6 +1493,167 @@ function Interests({ user, setUser }) {
                     </button>
                     <button className="secondary-button" onClick={findMatches}>
                       查找匹配
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* 兴趣问答界面 */}
+              {isInterestQuiz && (
+                <div className="tab-content">
+                  <h2 className="section-title">兴趣问答</h2>
+                  <p className="section-description">回答几个问题，我们将为你推荐适合的兴趣</p>
+                  
+                  {/* 测试进度条 */}
+                  <div className="progress-container">
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{ width: `${quizProgress}%` }}
+                      />
+                    </div>
+                    <p className="progress-text">进度: {quizProgress}%</p>
+                  </div>
+                  
+                  {/* 问答题目 */}
+                  <div className="quiz-questions">
+                    {quizQuestions.map((question, index) => (
+                      <div key={question.id} className="quiz-question">
+                        <h3 className="question-text">{index + 1}. {question.question}</h3>
+                        <div className="question-options">
+                          {question.options.map((option) => (
+                            <button
+                              key={option.value}
+                              className={`option-button ${quizAnswers[question.id] === option.value ? 'selected' : ''}`}
+                              onClick={() => handleQuizAnswer(question.id, option.value)}
+                            >
+                              {option.text}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="action-buttons">
+                    <button className="primary-button" onClick={calculateQuizResults}>
+                      查看结果
+                    </button>
+                    <button className="secondary-button" onClick={() => setIsInterestQuiz(false)}>
+                      取消
+                    </button>
+                  </div>
+                  
+                  {/* 问答结果 */}
+                  {quizResults && (
+                    <div className="quiz-results">
+                      <h3 className="results-title">你的兴趣分析结果</h3>
+                      <div className="results-list">
+                        {quizResults.map((result, index) => (
+                          <div key={index} className="result-item">
+                            <span className="result-category">
+                              {{
+                                hobbies: '爱好',
+                                sports: '运动',
+                                music: '音乐',
+                                movies: '电影',
+                                books: '书籍',
+                                food: '美食',
+                                travel: '旅行',
+                                personality: '性格特点',
+                                career: '职业',
+                                entertainment: '娱乐',
+                                lifestyle: '生活方式',
+                                values: '价值观'
+                              }[result.category]}
+                            </span>
+                            <span className="result-interest">{result.interest}</span>
+                            <span className="result-count">匹配度: {result.count}/5</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="results-note">已自动为你添加这些兴趣</p>
+                      <button className="secondary-button" onClick={() => setIsInterestQuiz(false)}>
+                        返回兴趣设置
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* 偏好测试界面 */}
+              {isPreferenceTest && (
+                <div className="tab-content">
+                  <h2 className="section-title">偏好测试</h2>
+                  <p className="section-description">在每对选项中选择你更喜欢的一个</p>
+                  
+                  {/* 测试进度条 */}
+                  <div className="progress-container">
+                    <div className="progress-bar">
+                      <div 
+                        className="progress-fill" 
+                        style={{ width: `${preferenceProgress}%` }}
+                      />
+                    </div>
+                    <p className="progress-text">进度: {preferenceProgress}%</p>
+                  </div>
+                  
+                  {/* 偏好测试题目 */}
+                  <div className="preference-questions">
+                    {preferencePairs.map((pair, index) => (
+                      <div key={pair.id} className="preference-question">
+                        <h3 className="question-text">{index + 1}. 你更喜欢？</h3>
+                        <div className="preference-options">
+                          <button
+                            className={`preference-button ${preferenceAnswers[pair.id] === 'A' ? 'selected' : ''}`}
+                            onClick={() => handlePreferenceAnswer(pair.id, 'A')}
+                          >
+                            {{
+                              hobbies: '爱好',
+                              sports: '运动',
+                              music: '音乐',
+                              movies: '电影',
+                              books: '书籍',
+                              food: '美食',
+                              travel: '旅行',
+                              personality: '性格特点',
+                              career: '职业',
+                              entertainment: '娱乐',
+                              lifestyle: '生活方式',
+                              values: '价值观'
+                            }[pair.optionA.category]}: {pair.optionA.interest}
+                          </button>
+                          <div className="preference-divider">VS</div>
+                          <button
+                            className={`preference-button ${preferenceAnswers[pair.id] === 'B' ? 'selected' : ''}`}
+                            onClick={() => handlePreferenceAnswer(pair.id, 'B')}
+                          >
+                            {{
+                              hobbies: '爱好',
+                              sports: '运动',
+                              music: '音乐',
+                              movies: '电影',
+                              books: '书籍',
+                              food: '美食',
+                              travel: '旅行',
+                              personality: '性格特点',
+                              career: '职业',
+                              entertainment: '娱乐',
+                              lifestyle: '生活方式',
+                              values: '价值观'
+                            }[pair.optionB.category]}: {pair.optionB.interest}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="action-buttons">
+                    <button className="primary-button" onClick={completePreferenceTest}>
+                      完成测试
+                    </button>
+                    <button className="secondary-button" onClick={() => setIsPreferenceTest(false)}>
+                      取消
                     </button>
                   </div>
                 </div>
