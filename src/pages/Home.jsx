@@ -7,6 +7,8 @@ function Home() {
   const [stats, setStats] = useState({})
   const [countdown, setCountdown] = useState({ days: '00', hours: '00', minutes: '00', seconds: '00' })
   const [nextRevealDate, setNextRevealDate] = useState('')
+  const [visitorCount, setVisitorCount] = useState(0)
+  const [isCounting, setIsCounting] = useState(false)
   
   useEffect(() => {
     loadData()
@@ -25,6 +27,62 @@ function Home() {
       matches: Math.floor(users.length * 0.7) // 模拟匹配数据
     })
   }
+  
+  // 处理用户访问计数
+  useEffect(() => {
+    const handleVisitorCount = async () => {
+      // 检查用户是否已经访问过（防刷机制）
+      const hasVisited = localStorage.getItem('ppsucdate_visited')
+      
+      if (!hasVisited) {
+        // 标记用户已访问
+        localStorage.setItem('ppsucdate_visited', 'true')
+        
+        // 获取当前访问计数
+        let count = await localforage.getItem('visitorCount') || 0
+        
+        // 增加计数
+        count += 1
+        
+        // 保存到本地存储
+        await localforage.setItem('visitorCount', count)
+        
+        // 触发计数动画
+        setIsCounting(true)
+        setVisitorCount(0)
+        
+        // 动画效果：从0计数到实际值
+        const duration = 1500 // 动画持续时间（毫秒）
+        const startTime = Date.now()
+        
+        const updateCount = () => {
+          const elapsed = Date.now() - startTime
+          const progress = Math.min(elapsed / duration, 1)
+          
+          // 使用缓动函数使动画更自然
+          const easeOutQuad = 1 - (1 - progress) * (1 - progress)
+          const currentCount = Math.floor(count * easeOutQuad)
+          
+          setVisitorCount(currentCount)
+          
+          if (progress < 1) {
+            requestAnimationFrame(updateCount)
+          } else {
+            setVisitorCount(count)
+            setIsCounting(false)
+          }
+        }
+        
+        requestAnimationFrame(updateCount)
+      } else {
+        // 如果用户已经访问过，直接获取当前计数
+        const count = await localforage.getItem('visitorCount') || 0
+        setVisitorCount(count)
+      }
+    }
+    
+    handleVisitorCount()
+  }, [])
 
   useEffect(() => {
     // 计算下一个周五晚上8点的时间
@@ -90,7 +148,13 @@ function Home() {
           {/* 顶部导航 */}
           <nav className="sjtudate-nav">
             <div className="nav-content">
-              <span className="nav-text">Join {stats.users || 0} students</span>
+              <span className="nav-text">
+                <span className="count-text">已有 </span>
+                <span className={`visitor-count ${isCounting ? 'counting' : ''}`}>
+                  {visitorCount.toLocaleString()}
+                </span>
+                <span className="count-text"> 位同学加入</span>
+              </span>
             </div>
           </nav>
 
