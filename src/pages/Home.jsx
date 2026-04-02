@@ -160,15 +160,15 @@ function Home() {
 
           {/* 主内容 */}
           <div className="main-content">
-            <h1 className="main-title">让一段缘分值得等待。</h1>
-            <p className="main-subtitle">For ppsuc.edu.cn</p>
-            <p className="main-description">
+            <h1 className="main-title animate-fade-in-up-1">让一段缘分值得等待。</h1>
+            <p className="main-subtitle animate-fade-in-up-2">For ppsuc.edu.cn</p>
+            <p className="main-description animate-fade-in-up-3">
               只需填写一份深度问卷，每周五晚八点，<br />
               您将收到匹配结果，并附上我们认为你们会合拍的理由。
             </p>
             
             {/* 操作按钮 */}
-            <div className="action-buttons">
+            <div className="action-buttons animate-fade-in-up-4">
               {!user ? (
                 <Link to="/register" className="sjtudate-btn">
                   立即注册
@@ -184,11 +184,11 @@ function Home() {
       </div>
 
       {/* 倒计时区域 */}
-      <div className="countdown-section">
+      <div className="countdown-section animate-fade-in-up-5">
         <div className="container">
           <div className="countdown-content">
-            <h2 className="countdown-section-title">距下次配对揭晓</h2>
-            <div className="countdown-timer">
+            <h2 className="countdown-section-title animate-fade-in-up-6">距下次配对揭晓</h2>
+            <div className="countdown-timer animate-fade-in-up-7">
               <span className="countdown-digit">{countdown.days}</span>
               <span className="countdown-separator">天</span>
               <span className="countdown-digit">{countdown.hours}</span>
@@ -198,7 +198,7 @@ function Home() {
               <span className="countdown-digit">{countdown.seconds}</span>
               <span className="countdown-separator">秒</span>
             </div>
-            <div className="countdown-date">
+            <div className="countdown-date animate-fade-in-up-8">
               {nextRevealDate}
             </div>
           </div>
@@ -206,24 +206,24 @@ function Home() {
       </div>
 
       {/* 步骤说明 */}
-      <div className="steps-section">
+      <div className="steps-section animate-fade-in">
         <div className="container">
           <div className="steps-grid">
-            <div className="step-item">
+            <div className="step-item animate-fade-in-up-1">
               <div className="step-number">01</div>
               <h3 className="step-title">填写一份深度问卷</h3>
               <p className="step-description">
                 让我们充分了解您的价值观、情感风格、生活方式，让算法为您找到最契合的人。
               </p>
             </div>
-            <div className="step-item">
+            <div className="step-item animate-fade-in-up-2">
               <div className="step-number">02</div>
               <h3 className="step-title">每周五晚八点，打开信封</h3>
               <p className="step-description">
                 收到对方的昵称、匹配度，以及我们认为你们会合拍的理由。点击「联系 TA」，我们将为您向对方发送简短的讯息，并向您提供对方的邮箱地址。
               </p>
             </div>
-            <div className="step-item">
+            <div className="step-item animate-fade-in-up-3">
               <div className="step-number">03</div>
               <h3 className="step-title">去见见 TA 吧！</h3>
               <p className="step-description">
@@ -235,31 +235,31 @@ function Home() {
       </div>
 
       {/* 平台特点 */}
-      <div className="features-section">
+      <div className="features-section animate-fade-in">
         <div className="container">
           <div className="features-grid">
-            <div className="feature-item">
+            <div className="feature-item animate-fade-in-up-1">
               <div className="feature-icon">🎯</div>
               <h3 className="feature-title">每周一次</h3>
               <p className="feature-description">
                 没有"左滑右滑"。每周五晚八点统一揭晓，一周至多一次配对。
               </p>
             </div>
-            <div className="feature-item">
+            <div className="feature-item animate-fade-in-up-2">
               <div className="feature-icon">💡</div>
               <h3 className="feature-title">精准匹配</h3>
               <p className="feature-description">
                 基于价值观、情感风格、生活方式等契合度研究与合理的匹配算法——不只看相似，也捕捉互补的差异。
               </p>
             </div>
-            <div className="feature-item">
+            <div className="feature-item animate-fade-in-up-3">
               <div className="feature-icon">🔒</div>
               <h3 className="feature-title">隐私优先</h3>
               <p className="feature-description">
                 PPSUC Date 不是公开的社交平台。任何人除每周五晚上收到匹配对象的信息（包括昵称、匹配度、共同点）外，只能看到与自己有关的信息。
               </p>
             </div>
-            <div className="feature-item">
+            <div className="feature-item animate-fade-in-up-4">
               <div className="feature-icon">🎓</div>
               <h3 className="feature-title">仅限公大</h3>
               <p className="feature-description">
@@ -271,27 +271,27 @@ function Home() {
       </div>
 
       {/* 常见问题 */}
-      <div className="faq-section">
+      <div className="faq-section animate-fade-in">
         <div className="container">
-          <h2 className="faq-title">常见问题</h2>
+          <h2 className="faq-title animate-fade-in-up-1">常见问题</h2>
           <div className="faq-content">
-            <p className="faq-question">PPSUC Date 是什么？</p>
-            <p className="faq-answer">
+            <p className="faq-question animate-fade-in-up-2">PPSUC Date 是什么？</p>
+            <p className="faq-answer animate-fade-in-up-3">
               PPSUC Date 是一个恋爱（date）匹配平台。我们的问卷和算法都围绕恋爱契合度设计，初衷是帮您找到"最适合自己"的那个人。当然，缘分的形式不止一种——也许你会在这里遇到志同道合的好朋友，我们同样乐见其成。
             </p>
             
-            <p className="faq-question">如何使用？</p>
-            <p className="faq-answer">
+            <p className="faq-question animate-fade-in-up-4">如何使用？</p>
+            <p className="faq-answer animate-fade-in-up-5">
               用公大邮箱注册，花 10 分钟填写一份关于您的价值观和生活方式的问卷，并「确认参与」，然后等待。每周五晚八点，您将收到一封信封，附有 TA 的昵称、匹配度，以及我们认为你们会合拍的理由。如果您选择联系 TA，双方将各自收到对方的邮箱——接下来的流程，由你们自己决定。
             </p>
             
-            <p className="faq-question">匹配算法是怎样的？</p>
-            <p className="faq-answer">
+            <p className="faq-question animate-fade-in-up-6">匹配算法是怎样的？</p>
+            <p className="faq-answer animate-fade-in-up-7">
               我们的算法借鉴了价值观契合度研究、五大人格特质理论和社会心理学成果。它不只寻找相似的人，也会捕捉互补的差异。
             </p>
             
-            <p className="faq-question">我的数据安全吗？</p>
-            <p className="faq-answer">
+            <p className="faq-question animate-fade-in-up-8">我的数据安全吗？</p>
+            <p className="faq-answer animate-fade-in-up-9">
               我们绝不出售您的数据。您的问卷答案仅用于匹配，且在数据库中以随机 ID 存储，与您的邮箱地址分开保存——即使是维护团队，也无法直接将两者关联起来。
             </p>
           </div>
@@ -299,19 +299,21 @@ function Home() {
       </div>
 
       {/* 底部CTA */}
-      <div className="cta-section">
+      <div className="cta-section animate-fade-in">
         <div className="container">
-          <h2 className="cta-title">准备好了吗？</h2>
-          <p className="cta-subtitle">每周五晚八点，为你揭晓最契合的 TA。</p>
-          {!user ? (
-            <Link to="/register" className="sjtudate-btn">
-              立即注册
-            </Link>
-          ) : (
-            <Link to="/interests" className="sjtudate-btn">
-              开始匹配
-            </Link>
-          )}
+          <h2 className="cta-title animate-fade-in-up-1">准备好了吗？</h2>
+          <p className="cta-subtitle animate-fade-in-up-2">每周五晚八点，为你揭晓最契合的 TA。</p>
+          <div className="animate-fade-in-up-3">
+            {!user ? (
+              <Link to="/register" className="sjtudate-btn">
+                立即注册
+              </Link>
+            ) : (
+              <Link to="/interests" className="sjtudate-btn">
+                开始匹配
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 

@@ -97,6 +97,11 @@ function Interests({ user, setUser }) {
   const [achievements, setAchievements] = useState([])
   const [showAchievements, setShowAchievements] = useState(false)
   
+  // 新设计：主分类卡片状态
+  const [selectedMainCategories, setSelectedMainCategories] = useState([])
+  const [expandedCategory, setExpandedCategory] = useState(null)
+  const maxSelections = 8
+  
   // MBTI相关状态
   const [mbtiAnswers, setMbtiAnswers] = useState({})
   const [mbtiResult, setMbtiResult] = useState(null)
@@ -306,6 +311,108 @@ function Interests({ user, setUser }) {
     }
   }
   
+  // 新设计：主分类卡片配置（参考图片）
+  const mainCategories = [
+    {
+      id: 'sports',
+      name: '运动',
+      emoji: '⚽',
+      color: '#FF9F43',
+      subOptions: ['篮球', '足球', '羽毛球', '乒乓球', '游泳', '跑步', '健身', '瑜伽']
+    },
+    {
+      id: 'travel',
+      name: '旅行',
+      emoji: '✈️',
+      color: '#54A0FF',
+      subOptions: ['城市游', '自然风光', '美食之旅', '海岛度假', '文化体验', '户外探险']
+    },
+    {
+      id: 'music',
+      name: '音乐',
+      emoji: '🎵',
+      color: '#FF6B9D',
+      subOptions: ['流行', '摇滚', '古典', '民谣', '电子', '说唱']
+    },
+    {
+      id: 'games',
+      name: '游戏',
+      emoji: '🎮',
+      color: '#5F27CD',
+      subOptions: ['主机游戏', '手机游戏', '电脑游戏', '桌游', '密室逃脱', '剧本杀']
+    },
+    {
+      id: 'reading',
+      name: '阅读',
+      emoji: '📚',
+      color: '#10AC84',
+      subOptions: ['小说', '散文', '历史', '科幻', '悬疑', '心理学']
+    },
+    {
+      id: 'movies',
+      name: '电影',
+      emoji: '🎬',
+      color: '#EE5A6F',
+      subOptions: ['动作', '喜剧', '科幻', '悬疑', '爱情', '动画']
+    },
+    {
+      id: 'pets',
+      name: '宠物',
+      emoji: '🐱',
+      color: '#FF9FF3',
+      subOptions: ['猫', '狗', '鸟类', '鱼类', '爬宠', '其他']
+    },
+    {
+      id: 'handicraft',
+      name: '手工',
+      emoji: '✂️',
+      color: '#FECA57',
+      subOptions: ['绘画', '陶艺', '编织', '木工', '剪纸', '其他']
+    },
+    {
+      id: 'fashion',
+      name: '穿搭',
+      emoji: '👗',
+      color: '#FF6B6B',
+      subOptions: ['休闲风', '正式风', '运动风', '复古风', '潮流风', '简约风']
+    },
+    {
+      id: 'anime',
+      name: '动漫',
+      emoji: '🎌',
+      color: '#48DBFB',
+      subOptions: ['日漫', '国漫', '美漫', '二次元', 'cosplay', '手办']
+    },
+    {
+      id: 'study',
+      name: '学习',
+      emoji: '📖',
+      color: '#1DD1A1',
+      subOptions: ['语言学习', '编程', '设计', '金融', '心理学', '其他']
+    },
+    {
+      id: 'tech',
+      name: '科技',
+      emoji: '💻',
+      color: '#5F27CD',
+      subOptions: ['数码产品', '智能家居', 'AI技术', '编程开发', '电子产品', '其他']
+    },
+    {
+      id: 'startup',
+      name: '创业',
+      emoji: '🚀',
+      color: '#FF9F43',
+      subOptions: ['互联网', '电商', '自媒体', '餐饮', '教育', '其他']
+    },
+    {
+      id: 'food',
+      name: '美食',
+      emoji: '🍜',
+      color: '#FECA57',
+      subOptions: ['中餐', '西餐', '日料', '韩料', '甜点', '火锅']
+    }
+  ]
+
   // 兴趣选项配置 - 扩展为更丰富的标签体系
   const interestOptions = {
     hobbies: ['阅读', '旅行', '运动', '音乐', '电影', '烹饪', '摄影', '绘画', '编程', '游戏', '手工', '舞蹈', '书法', '棋类', '收藏', '园艺', '宠物'],
@@ -1533,6 +1640,59 @@ function Interests({ user, setUser }) {
     }
   }
   
+  // 新设计：处理主分类卡片选择
+  const handleMainCategorySelect = (categoryId) => {
+    if (selectedMainCategories.includes(categoryId)) {
+      // 如果已选择，则取消选择
+      setSelectedMainCategories(prev => prev.filter(id => id !== categoryId))
+      setExpandedCategory(null)
+    } else {
+      // 如果未选择且未达到最大选择数
+      if (selectedMainCategories.length < maxSelections) {
+        setSelectedMainCategories(prev => [...prev, categoryId])
+        setExpandedCategory(categoryId)
+      } else {
+        alert(`最多只能选择${maxSelections}个兴趣类别`)
+      }
+    }
+  }
+  
+  // 新设计：处理细分选项选择
+  const handleSubOptionSelect = (categoryId, subOption) => {
+    const category = mainCategories.find(c => c.id === categoryId)
+    if (!category) return
+    
+    // 将细分选项映射到对应的兴趣类别
+    const interestMap = {
+      'sports': 'sports',
+      'travel': 'travel',
+      'music': 'music',
+      'games': 'entertainment',
+      'reading': 'books',
+      'movies': 'movies',
+      'pets': 'hobbies',
+      'handicraft': 'hobbies',
+      'fashion': 'lifestyle',
+      'anime': 'entertainment',
+      'study': 'hobbies',
+      'tech': 'career',
+      'startup': 'career',
+      'food': 'food'
+    }
+    
+    const interestCategory = interestMap[categoryId] || 'hobbies'
+    
+    setInterests(prev => {
+      const updated = { ...prev }
+      if (updated[interestCategory].includes(subOption)) {
+        updated[interestCategory] = updated[interestCategory].filter(item => item !== subOption)
+      } else {
+        updated[interestCategory].push(subOption)
+      }
+      return updated
+    })
+  }
+  
   // 优化的匹配算法 - 已经在前面定义
 
   return (
@@ -1583,321 +1743,120 @@ function Interests({ user, setUser }) {
                 </button>
               </div>
               
-              {/* 兴趣爱好选项卡 */}
+              {/* 兴趣爱好选项卡 - 新设计：卡片式布局 */}
               {activeTab === 'interests' && (
                 <div className="tab-content">
-                  <h2 className="section-title">选择你的兴趣爱好</h2>
+                  <div className="interests-header">
+                    <h2 className="section-title">匹配你的兴趣</h2>
+                    <p className="section-description">选出你的兴趣爱好，找到与你兴趣相投的他/她</p>
+                    <p className="selection-hint">
+                      点击选择你的兴趣爱好，最多选{maxSelections}个：
+                      <span className="selection-count">{selectedMainCategories.length}/{maxSelections}</span>
+                    </p>
+                  </div>
                   
-                  {/* 筛选和搜索功能 */}
-                  <div className="filter-section">
-                    <div className="search-bar">
-                      <input
-                        type="text"
-                        placeholder="搜索兴趣..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="search-input"
-                      />
-                    </div>
-                    
-                    <div className="category-filters">
-                      <button
-                        className={`filter-button ${filterCategory === 'all' ? 'active' : ''}`}
-                        onClick={() => setFilterCategory('all')}
+                  {/* 主分类卡片网格 */}
+                  <div className="main-categories-grid">
+                    {mainCategories.map((category) => (
+                      <div
+                        key={category.id}
+                        className={`main-category-card ${selectedMainCategories.includes(category.id) ? 'selected' : ''} ${expandedCategory === category.id ? 'expanded' : ''}`}
+                        style={{ '--category-color': category.color }}
+                        onClick={() => handleMainCategorySelect(category.id)}
                       >
-                        全部
-                      </button>
-                      {Object.entries(interestOptions).map(([category, _]) => (
-                        <button
-                          key={category}
-                          className={`filter-button ${filterCategory === category ? 'active' : ''}`}
-                          onClick={() => setFilterCategory(category)}
-                        >
-                          {{
-                            hobbies: '爱好',
-                            sports: '运动',
-                            music: '音乐',
-                            movies: '电影',
-                            books: '书籍',
-                            food: '美食',
-                            travel: '旅行',
-                            personality: '性格特点',
-                            career: '职业',
-                            entertainment: '娱乐',
-                            lifestyle: '生活方式',
-                            values: '价值观'
-                          }[category]}
-                        </button>
-                      ))}
-                    </div>
-                    
-                    {/* 类别选择器 */}
-                    <div className="category-selector">
-                      <p className="selector-title">选择类别：</p>
-                      <div className="category-tags">
-                        {Object.entries(interestOptions).map(([category, _]) => (
-                          <button
-                            key={category}
-                            className={`category-tag ${selectedCategories.includes(category) ? 'selected' : ''}`}
-                            onClick={() => {
-                              setSelectedCategories(prev => 
-                                prev.includes(category)
-                                  ? prev.filter(c => c !== category)
-                                  : [...prev, category]
-                              )
-                            }}
-                          >
-                            {{
-                              hobbies: '爱好',
-                              sports: '运动',
-                              music: '音乐',
-                              movies: '电影',
-                              books: '书籍',
-                              food: '美食',
-                              travel: '旅行',
-                              personality: '性格特点',
-                              career: '职业',
-                              entertainment: '娱乐',
-                              lifestyle: '生活方式',
-                              values: '价值观'
-                            }[category]}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* 互动式兴趣探索 */}
-                    <div className="interactive-section">
-                      <h4 className="section-subtitle">互动式兴趣探索</h4>
-                      <div className="interactive-buttons">
-                        <button className="interactive-button" onClick={startInterestQuiz}>
-                          兴趣问答
-                        </button>
-                        <button className="interactive-button" onClick={startPreferenceTest}>
-                          偏好测试
-                        </button>
-                        <button className="interactive-button" onClick={startInteractiveCards}>
-                          互动卡片
-                        </button>
-                        <button className="interactive-button" onClick={generateContentRecommendations}>
-                          内容推荐
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* 兴趣热度分析 */}
-                    <div className="popularity-section">
-                      <div className="popularity-header">
-                        <h4 className="popularity-title">兴趣热度分析</h4>
-                        <button
-                          className={`toggle-button ${showPopularity ? 'active' : ''}`}
-                          onClick={() => setShowPopularity(!showPopularity)}
-                        >
-                          {showPopularity ? '收起' : '展开'}
-                        </button>
-                      </div>
-                      
-                      {showPopularity && (
-                        <div className="popularity-content">
-                          {Object.entries(interestPopularity).map(([category, popularInterests]) => (
-                            <div key={category} className="popularity-category">
-                              <h5 className="popularity-category-title">
-                                {{
-                                  hobbies: '爱好',
-                                  sports: '运动',
-                                  music: '音乐',
-                                  movies: '电影',
-                                  books: '书籍',
-                                  food: '美食',
-                                  travel: '旅行',
-                                  personality: '性格特点',
-                                  career: '职业',
-                                  entertainment: '娱乐',
-                                  lifestyle: '生活方式',
-                                  values: '价值观'
-                                }[category]}
-                              </h5>
-                              <div className="popularity-list">
-                                {popularInterests.map(([interest, count], index) => (
-                                  <div key={interest} className="popularity-item">
-                                    <span className="popularity-rank">{index + 1}</span>
-                                    <span className="popularity-interest">{interest}</span>
-                                    <span className="popularity-count">{count}人选择</span>
-                                  </div>
-                                ))}
-                              </div>
+                        <div className="card-icon">{category.emoji}</div>
+                        <div className="card-name">{category.name}</div>
+                        
+                        {/* 细分选项 - 仅在选中时显示 */}
+                        {selectedMainCategories.includes(category.id) && (
+                          <div className="sub-options" onClick={(e) => e.stopPropagation()}>
+                            <div className="sub-options-title">选择具体的{category.name}类型：</div>
+                            <div className="sub-options-grid">
+                              {category.subOptions.map((subOption) => (
+                                <button
+                                  key={subOption}
+                                  className={`sub-option-button ${
+                                    interests[
+                                      {
+                                        'sports': 'sports',
+                                        'travel': 'travel',
+                                        'music': 'music',
+                                        'games': 'entertainment',
+                                        'reading': 'books',
+                                        'movies': 'movies',
+                                        'pets': 'hobbies',
+                                        'handicraft': 'hobbies',
+                                        'fashion': 'lifestyle',
+                                        'anime': 'entertainment',
+                                        'study': 'hobbies',
+                                        'tech': 'career',
+                                        'startup': 'career',
+                                        'food': 'food'
+                                      }[category.id] || 'hobbies'
+                                    ].includes(subOption) ? 'selected' : ''
+                                  }`}
+                                  onClick={() => handleSubOptionSelect(category.id, subOption)}
+                                >
+                                  {subOption}
+                                </button>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* 兴趣推荐 */}
-                    <div className="recommendation-section">
-                      <div className="recommendation-header">
-                        <h4 className="recommendation-title">为你推荐</h4>
-                        <button
-                          className={`toggle-button ${showRecommendations ? 'active' : ''}`}
-                          onClick={() => setShowRecommendations(!showRecommendations)}
-                        >
-                          {showRecommendations ? '收起' : '展开'}
-                        </button>
-                      </div>
-                      
-                      {showRecommendations && (
-                        <div className="recommendation-content">
-                          {Object.entries(recommendedInterests).map(([category, recommendations]) => (
-                            <div key={category} className="recommendation-category">
-                              <h5 className="recommendation-category-title">
-                                {{
-                                  hobbies: '爱好',
-                                  sports: '运动',
-                                  music: '音乐',
-                                  movies: '电影',
-                                  books: '书籍',
-                                  food: '美食',
-                                  travel: '旅行',
-                                  personality: '性格特点',
-                                  career: '职业',
-                                  entertainment: '娱乐',
-                                  lifestyle: '生活方式',
-                                  values: '价值观'
-                                }[category]}
-                              </h5>
-                              <div className="recommendation-list">
-                                {recommendations.map(([interest, count], index) => (
-                                  <div key={interest} className="recommendation-item">
-                                    <span className="recommendation-rank">{index + 1}</span>
-                                    <span className="recommendation-interest">{interest}</span>
-                                    <span className="recommendation-count">{count}人同时选择</span>
-                                    <button
-                                      className="add-recommendation-button"
-                                      onClick={() => handleInterestChange(category, interest)}
-                                    >
-                                      添加
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                          {Object.keys(recommendedInterests).length === 0 && (
-                            <div className="empty-recommendations">
-                              <p>选择一些兴趣后，我们会为你推荐相关的兴趣</p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* 内容推荐反馈 */}
-                    {contentRecommendations.length > 0 && (
-                      <div className="content-recommendations">
-                        <h4 className="section-subtitle">内容推荐</h4>
-                        <div className="content-list">
-                          {contentRecommendations.map(content => (
-                            <div key={content.id} className="content-item">
-                              <img 
-                                src={content.image} 
-                                alt={content.title} 
-                                className="content-image"
-                              />
-                              <div className="content-info">
-                                <h5 className="content-title">{content.title}</h5>
-                                <p className="content-description">{content.description}</p>
-                                <div className="content-feedback">
-                                  <button 
-                                    className={`feedback-button ${contentFeedback[content.id] === 'like' ? 'active' : ''}`}
-                                    onClick={() => handleContentFeedback(content.id, 'like')}
-                                  >
-                                    👍 喜欢
-                                  </button>
-                                  <button 
-                                    className={`feedback-button ${contentFeedback[content.id] === 'dislike' ? 'active' : ''}`}
-                                    onClick={() => handleContentFeedback(content.id, 'dislike')}
-                                  >
-                                    👎 不感兴趣
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* 兴趣选项展示 */}
-                    {Object.entries(interestOptions).map(([category, options]) => {
-                      // 应用筛选条件
-                      if (filterCategory !== 'all' && filterCategory !== category) {
-                        return null
-                      }
-                      
-                      // 应用搜索过滤
-                      const filteredOptions = options.filter(option => 
-                        option.toLowerCase().includes(searchQuery.toLowerCase())
-                      )
-                      
-                      return (
-                        <div key={category} className="interest-category">
-                          <h3 className="category-title">
-                            {{
-                              hobbies: '爱好',
-                              sports: '运动',
-                              music: '音乐',
-                              movies: '电影',
-                              books: '书籍',
-                              food: '美食',
-                              travel: '旅行',
-                              personality: '性格特点',
-                              career: '职业',
-                              entertainment: '娱乐',
-                              lifestyle: '生活方式',
-                              values: '价值观'
-                            }[category]}
-                          </h3>
-                          
-                          <div className="interest-options">
-                            {filteredOptions.map(option => (
-                              <button
-                                key={option}
-                                className={`interest-option ${interests[category].includes(option) ? 'selected' : ''}`}
-                                onClick={() => {
-                                  handleInterestChange(category, option);
-                                }}
-                              >
-                                {option}
-                              </button>
-                            ))}
                           </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* 已选择的兴趣摘要 */}
+                  {selectedMainCategories.length > 0 && (
+                    <div className="selected-summary">
+                      <h3 className="summary-title">已选择的兴趣</h3>
+                      <div className="selected-tags">
+                        {selectedMainCategories.map((categoryId) => {
+                          const category = mainCategories.find(c => c.id === categoryId)
+                          const interestCategory = {
+                            'sports': 'sports',
+                            'travel': 'travel',
+                            'music': 'music',
+                            'games': 'entertainment',
+                            'reading': 'books',
+                            'movies': 'movies',
+                            'pets': 'hobbies',
+                            'handicraft': 'hobbies',
+                            'fashion': 'lifestyle',
+                            'anime': 'entertainment',
+                            'study': 'hobbies',
+                            'tech': 'career',
+                            'startup': 'career',
+                            'food': 'food'
+                          }[categoryId] || 'hobbies'
+                          const selectedSubs = interests[interestCategory].filter(sub => 
+                            category.subOptions.includes(sub)
+                          )
                           
-                          <div className="custom-interest">
-                            <input
-                              type="text"
-                              placeholder="自定义选项"
-                              value={customInterests[category] || ''}
-                              onChange={(e) => handleCustomInterest(category, e.target.value)}
-                              className="custom-interest-input"
-                            />
-                            <button
-                              className="add-interest-button"
-                              onClick={() => addCustomInterest(category)}
-                            >
-                              添加
-                            </button>
-                          </div>
-                        </div>
-                      )
-                    })}
-                    
-                    <div className="action-buttons">
-                      <button className="primary-button" onClick={saveInterests}>
-                        保存兴趣
-                      </button>
-                      <button className="secondary-button" onClick={findMatches}>
-                        查找匹配
-                      </button>
+                          return (
+                            <div key={categoryId} className="selected-category-tag">
+                              <span className="tag-emoji">{category.emoji}</span>
+                              <span className="tag-name">{category.name}</span>
+                              {selectedSubs.length > 0 && (
+                                <span className="tag-subs">({selectedSubs.join(', ')})</span>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
+                  )}
+                  
+                  {/* 操作按钮 */}
+                  <div className="action-buttons">
+                    <button 
+                      className="primary-button match-button" 
+                      onClick={findMatches}
+                      disabled={selectedMainCategories.length === 0}
+                    >
+                      开始匹配
+                    </button>
                   </div>
                 </div>
               )}

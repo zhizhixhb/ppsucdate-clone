@@ -71,6 +71,39 @@ function App() {
     await localforage.removeItem('rememberedUser') // 兼容旧版本
   }
 
+  // 实现自动跳转到首页的功能 - 只在访问不存在的路径时跳转
+  useEffect(() => {
+    // 定义允许的路径
+    const allowedPaths = [
+      '/',
+      '/index.html',
+      '/login',
+      '/register',
+      '/interests',
+      '/profile',
+      '/schedule',
+      '/messages',
+      '/events',
+      '/admin',
+      '/admin/setup',
+      '/test-admin',
+      '/about',
+      '/contact'
+    ];
+    
+    // 检查当前路径是否在允许的路径列表中
+    const currentPath = window.location.pathname;
+    const isAllowed = allowedPaths.some(path => currentPath === path);
+    
+    // 只有当路径不在允许列表中时才跳转
+    if (!isAllowed) {
+      // 使用setTimeout避免立即跳转导致的问题
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
+    }
+  }, [])
+
   return (
     <Router>
       <Header user={user} onLogout={handleLogout} />
@@ -82,12 +115,14 @@ function App() {
         <Route path="/schedule" element={user ? <Schedule user={user} /> : <Navigate to="/login" />} />
         <Route path="/messages" element={user ? <Messages user={user} /> : <Navigate to="/login" />} />
         <Route path="/events" element={user ? <Events user={user} /> : <Navigate to="/login" />} />
-          <Route path="/interests" element={user ? <Interests user={user} setUser={setUser} /> : <Navigate to="/login" />} />
-          <Route path="/admin" element={user ? <Admin user={user} setUser={setUser} /> : <Navigate to="/login" />} />
-          <Route path="/admin/setup" element={user ? <AdminSetup user={user} setUser={setUser} /> : <Navigate to="/login" />} />
-          <Route path="/test-admin" element={user ? <TestAdmin user={user} setUser={setUser} /> : <Navigate to="/login" />} />
-          <Route path="/about" element={user ? <About /> : <Navigate to="/login" />} />
-          <Route path="/contact" element={user ? <Contact /> : <Navigate to="/login" />} />
+        <Route path="/interests" element={user ? <Interests user={user} setUser={setUser} /> : <Navigate to="/login" />} />
+        <Route path="/admin" element={user ? <Admin user={user} setUser={setUser} /> : <Navigate to="/login" />} />
+        <Route path="/admin/setup" element={user ? <AdminSetup user={user} setUser={setUser} /> : <Navigate to="/login" />} />
+        <Route path="/test-admin" element={user ? <TestAdmin user={user} setUser={setUser} /> : <Navigate to="/login" />} />
+        <Route path="/about" element={user ? <About /> : <Navigate to="/login" />} />
+        <Route path="/contact" element={user ? <Contact /> : <Navigate to="/login" />} />
+        {/* 404页面，重定向到首页 */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   )

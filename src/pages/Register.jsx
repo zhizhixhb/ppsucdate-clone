@@ -68,11 +68,11 @@ function Register({ onRegister }) {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">
+          <h1 className="hero-title animate-fade-in-up-1">
             <span className="brand-highlight">PPSUC Date</span>
           </h1>
-          <p className="hero-subtitle">加入我们</p>
-          <p className="hero-description">
+          <p className="hero-subtitle animate-fade-in-up-2">加入我们</p>
+          <p className="hero-description animate-fade-in-up-3">
             注册账号，开启您的校园社交之旅
           </p>
         </div>
@@ -81,10 +81,10 @@ function Register({ onRegister }) {
       {/* Register Form */}
       <section className="auth-form-section">
         <div className="container">
-          <div className="auth-form-card">
+          <div className="auth-form-card animate-fade-in-up-4">
             <h2 className="auth-form-title">注册</h2>
             <form onSubmit={handleSubmit} className="auth-form">
-              <div className="form-group">
+              <div className="form-group animate-fade-in-up-5">
                 <label htmlFor="username">用户名</label>
                 <input
                   type="text"
@@ -96,7 +96,7 @@ function Register({ onRegister }) {
                   className="auth-input"
                 />
               </div>
-              <div className="form-group">
+              <div className="form-group animate-fade-in-up-6">
                 <label htmlFor="email">邮箱</label>
                 <input
                   type="email"
@@ -108,7 +108,7 @@ function Register({ onRegister }) {
                   className="auth-input"
                 />
               </div>
-              <div className="form-group">
+              <div className="form-group animate-fade-in-up-7">
                 <label htmlFor="password">密码</label>
                 <input
                   type="password"
@@ -120,12 +120,12 @@ function Register({ onRegister }) {
                   className="auth-input"
                 />
               </div>
-              <div className="form-group">
+              <div className="form-group animate-fade-in-up-8">
                 <button type="submit" className="auth-button">
                   注册
                 </button>
               </div>
-              <div className="auth-links">
+              <div className="auth-links animate-fade-in-up-9">
                 <p>已有账号？ <Link to="/login">立即登录</Link></p>
               </div>
             </form>
